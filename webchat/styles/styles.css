@@ -7,6 +7,44 @@ body{
 	background-color:#73a40d;
 	font-family:Arial, Helvetica, sans-serif;
 	font-size:12px;
+	text-align:center;
+}
+
+h2{
+	 font-family:Arial, Helvetica, sans-serif;
+	 font-size:24px;
+	 margin:0px 5px 14px 5px;
+}
+
+.headerDiv{
+	height:110px;
+	margin-bottom:10px;
+}
+
+.indexBodyDiv{
+	margin:auto;
+	width:350px;
+}
+
+.indexFormDiv{
+	margin:auto;
+	width:260px;
+	background-color:white;
+	padding:10px 15px 15px 15px;
+	border:3px #73a40d solid;
+}
+
+.inputTagDiv{
+	 width:130px;
+	 height:22px;
+	 float:left;
+	 text-align:left;
+	 font-weight:bold;
+}
+
+.formInputDiv{
+	height:22px;
+	text-align:left;
 }
 
 .textField{
