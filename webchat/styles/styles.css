@@ -60,7 +60,6 @@ h2{
 .chatMainDiv{
 	margin:auto;
 	width:815px;
-	background-color:#F00;
 }
 
 .chatMessagesDiv{
@@ -82,5 +81,16 @@ h2{
 	text-align:left;
 	float:right;
 	font-weight:bold;
-	
+}
+
+.yourProfileDiv{
+	background-color:white;
+	width:150px;
+	height:174px;
+	border:3px #73a40d solid;
+	padding:5px 5px 5px 5px;
+	text-align:left;
+	float:right;
+	font-weight:bold;
+	margin-top:10px;
 }
