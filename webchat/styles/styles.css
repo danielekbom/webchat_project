@@ -56,3 +56,13 @@ h2{
 	height:22px;
 	padding:2px;
 }
+
+.chatMainDiv{
+	 margin:auto;
+	 background-color:white;
+	 width:650px;
+	 height:400px;
+	 border:3px #73a40d solid;
+	 padding:5px 5px 5px 5px;
+	 text-align:left;
+}
