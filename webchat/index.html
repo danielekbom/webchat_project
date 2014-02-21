@@ -1,0 +1,46 @@
+<html>
+<head>
+	<meta charset="UTF-8">
+</head>
+<head>
+<title>Chat</title>
+</head>
+<link rel="stylesheet" type="text/css" href="styles/styles.css" />
+<body style="text-align:center;">
+
+<div style="height:110px; margin-bottom:10px;">
+	<img src="styles/images/headerlogo.gif" />
+</div>
+
+<div style="margin:auto; width:350px;">
+	<div style="margin:auto; width:260px; background-color:white; padding:10px 15px 15px 15px; border:3px #73a40d solid;">
+    	<h2 style="font-family:Arial, Helvetica, sans-serif; font-size:24px; margin:0px 5px 14px 5px;">Login</h2>
+		<form name="login" method="post" action="http://user.it.uu.se/cgi-bin/cgiwrap/daek3938/chat.cgi">
+			<div style="width:130px; height:22px; float:left; text-align:left; font-weight:bold;">Username: </div>
+            <div style="height:22px;"><input type="text" name="username" value="" class="textField"></div><br />
+			<div style="width:130px; height:22px; float:left; text-align:left; font-weight:bold;">Password: </div>
+            <div style="height:22px;"><input type="password" name="password" value="" class="textField"></div><br />
+    		<input type="hidden" name="formType" value="login">
+			<div style="width:130px; height:22px; float:left; text-align:left;"></div>
+            <div style="height:22px; text-align:left;"><button type="submit" value="login" name="submit">Login</button></div>
+		</form>
+	</div>
+	<br /><br />
+	<div style="margin:auto; width:260px; background-color:white; padding:10px 15px 15px 15px; border:3px #73a40d solid;">
+    	<h2 style="font-family:Arial, Helvetica, sans-serif; font-size:24px; margin:0px 5px 14px 5px;">Signup</h2>
+		<form name="signup" method="post" action="http://user.it.uu.se/cgi-bin/cgiwrap/daek3938/chat.cgi">
+			<div style="width:130px; height:22px; float:left; text-align:left; font-weight:bold;">Username: </div>
+        	<div style="height:22px;"><input type="text" name="username" value="" class="textField"></div><br />
+    		<div style="width:130px; height:22px; float:left; text-align:left; font-weight:bold;">Password: </div>
+        	<div style="height:22px;"><input type="password" name="password" value="" class="textField"></div><br />
+    		<div style="width:130px; height:22px; float:left; text-align:left; font-weight:bold;">Repeat password: </div>
+        	<div style="height:22px;"><input type="password" name="repeatPassword" value="" class="textField"></div><br />
+    		<input type="hidden" name="formType" value="signup">
+    		<div style="width:130px; height:22px; float:left; text-align:left;"></div>
+        	<div style="height:22px; text-align:left;"><button type="submit" value="signup" name="submit">Signup</button></div>
+		</form>
+	</div>
+</div>
+
+</body>
+</html>
