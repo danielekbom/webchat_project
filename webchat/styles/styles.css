@@ -38,11 +38,11 @@ h2{
 }
 
 .inputTagDiv{
-	 width:130px;
-	 height:22px;
-	 float:left;
-	 text-align:left;
-	 font-weight:bold;
+	width:130px;
+	height:22px;
+	float:left;
+	text-align:left;
+	font-weight:bold;
 }
 
 .formInputDiv{
@@ -58,11 +58,29 @@ h2{
 }
 
 .chatMainDiv{
-	 margin:auto;
-	 background-color:white;
-	 width:650px;
-	 height:400px;
-	 border:3px #73a40d solid;
-	 padding:5px 5px 5px 5px;
-	 text-align:left;
+	margin:auto;
+	width:815px;
+	background-color:#F00;
+}
+
+.chatMessagesDiv{
+	background-color:white;
+	width:620px;
+	height:400px;
+	border:3px #73a40d solid;
+	padding:5px 5px 5px 5px;
+	text-align:left;
+	float:left;
+}
+
+.chatListDiv{
+	background-color:white;
+	width:150px;
+	height:200px;
+	border:3px #73a40d solid;
+	padding:5px 5px 5px 5px;
+	text-align:left;
+	float:right;
+	font-weight:bold;
+	
 }
