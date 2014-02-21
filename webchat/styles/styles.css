@@ -16,6 +16,10 @@ h2{
 	 margin:0px 5px 14px 5px;
 }
 
+button{
+	width:65px;
+}
+
 .headerDiv{
 	height:110px;
 	margin-bottom:10px;
@@ -50,7 +54,7 @@ h2{
 	text-align:left;
 }
 
-.textField{
+.indexTextField{
 	border:1px black solid;
 	width:130px;
 	height:22px;
@@ -93,4 +97,22 @@ h2{
 	float:right;
 	font-weight:bold;
 	margin-top:10px;
+}
+
+.writeMessageDiv{
+	background-color:white;
+	width:620px;
+	height:25px;
+	border:3px #73a40d solid;
+	padding:1px 5px 1px 5px;
+	text-align:left;
+	float:left;
+	font-weight:bold;
+	margin-top:10px;
+}
+
+.postTextField{
+	border:0px;
+	width:550px;
+	margin-right:5px;
 }

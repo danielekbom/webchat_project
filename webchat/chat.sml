@@ -55,7 +55,7 @@ fun generateChat() =
     let
 	val messages = readMSGS(readChat("../webchat/chats/Main.txt"))
     in
-	print ("<div class=\"chatMainDiv\"><div class=\"chatMessagesDiv\">" ^ messages ^ " </div><div class=\"chatListDiv\">Chats<br /></div><br /><div class=\"yourProfileDiv\">Your profile<br /></div></div>")
+	print ("<div class=\"chatMainDiv\"><div class=\"chatMessagesDiv\">" ^ messages ^ " </div><div class=\"chatListDiv\">Chats<br /></div><br /><div class=\"yourProfileDiv\">Your profile<br /></div><br /><div class=\"writeMessageDiv\"><form><input type=\"text\" class=\"postTextField\"><button type=\"submit\">Post</button></form></div></div>")
     end;
 
 fun login() =
