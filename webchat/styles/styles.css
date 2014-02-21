@@ -19,6 +19,9 @@ h2{
 .headerDiv{
 	height:110px;
 	margin-bottom:10px;
+	background-image:url(images/headerlogo.gif);
+	background-repeat:no-repeat;
+	background-position:center;
 }
 
 .indexBodyDiv{

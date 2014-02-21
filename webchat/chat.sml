@@ -101,6 +101,7 @@ fun main() =
 	val formType = getOpt(cgi_field_string("formType"), "")
     in
 	(print "Content-type: text/html\n\n<html><head><link rel=\"stylesheet\" type=\"text/css\" href=\"http://user.it.uu.se/~daek3938/webchat/styles/styles.css\" /></head><body>";
+	print "<div class=\"headerDiv\"></div>";
 	(if formType = "login" then login() else signup());
 	print "</body></html>")
     end;
