@@ -82,6 +82,7 @@ button{
 	padding:5px 5px 5px 5px;
 	text-align:left;
 	float:left;
+	overflow-y: scroll;
 }
 
 .chatPostLine{
