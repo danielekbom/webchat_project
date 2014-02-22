@@ -44,10 +44,10 @@ fun readChat chatName =
 	(closeIn(chatStream); Chat(chatName, readChat'(map implode(splitList(explode(totalChat), [[]], #">")))))
     end;
 
-fun readMSG(MSG(x, y, z)) = (x ^ " " ^ y ^ ": " ^ z)
+fun readMSG(MSG(x, y, z)) = (x ^ " " ^ y ^ ":<br /><i>" ^ z ^ "</i><br /><div class=\"chatPostLine\"></div>")
 
 fun readMSGS (Chat(name, [])) = ""
-  | readMSGS (Chat(name,x::xs)) = readMSG(x) ^ "<br />" ^ readMSGS (Chat(name,xs))
+  | readMSGS (Chat(name,x::xs)) = readMSG(x) ^ readMSGS (Chat(name,xs))
   | readMSGS _ = raise Domain
 
 
@@ -100,7 +100,7 @@ fun main() =
     let
 	val formType = getOpt(cgi_field_string("formType"), "")
     in
-	(print "Content-type: text/html\n\n<html><head><link rel=\"stylesheet\" type=\"text/css\" href=\"http://user.it.uu.se/~daek3938/webchat/styles/styles.css\" /></head><body>";
+	(print "Content-type: text/html\n\n<!DOCTYPE html><html><head><meta charset=\"UTF-8\"><link rel=\"stylesheet\" type=\"text/css\" href=\"http://user.it.uu.se/~daek3938/webchat/styles/styles.css\" /></head><body>";
 	print "<div class=\"headerDiv\"></div>";
 	(if formType = "login" then login() else signup());
 	print "</body></html>")
