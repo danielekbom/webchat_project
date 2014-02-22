@@ -7,6 +7,10 @@ function scrollChatWindow(){
 	messageDiv.scrollTop = messageDiv.scrollHeight;
 }
 
+function setTextFieldFocus(){
+	document.getElementById('postTextField').focus();
+}
+
 function getChatMessages(){
 	var xmlhttp;
 	if (window.XMLHttpRequest){
@@ -44,7 +48,7 @@ function loadXMLDoc()
 			//var chatMessages = chatMessagesDiv.innerHTML;
     		var txtDocText = xmlhttp.responseText;
 			if(txtDocText != window.currentChatMessages){
-				document.getElementById('currentMsgInput').value = document.getElementById('postMessage').value;
+				document.getElementById('currentMsgInput').value = document.getElementById('postTextField').value;
 				document.getElementById('reloadChat').submit();
 			}
     	}
@@ -55,6 +59,7 @@ function loadXMLDoc()
 
 window.onload = scrollChatWindow();
 window.onload = getChatMessages();
+window.onload = setTextFieldFocus();
 window.setInterval(function(){
   loadXMLDoc();
 }, 5000);
