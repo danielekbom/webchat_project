@@ -51,11 +51,11 @@ fun readMSGS (Chat(name, [])) = ""
   | readMSGS _ = raise Domain
 
 
-fun generateChat() =
+fun generateChat(chat) =
     let
 	val messages = readMSGS(readChat("../webchat/chats/Main.txt"))
     in
-	print ("<div class=\"chatMainDiv\"><div class=\"chatMessagesDiv\">" ^ messages ^ " </div><div class=\"chatListDiv\">Chats<br /></div><br /><div class=\"yourProfileDiv\">Your profile<br /></div><br /><div class=\"writeMessageDiv\"><form><input type=\"text\" class=\"postTextField\"><button type=\"submit\">Post</button></form></div></div>")
+	print ("<div class=\"chatMainDiv\"><div class=\"chatMessagesDiv\"><h3>" ^ chat ^ " chat</h3>" ^ messages ^ " </div><div class=\"chatListDiv\">Chats<br /></div><br /><div class=\"yourProfileDiv\">Your profile<br /></div><br /><div class=\"writeMessageDiv\"><form><input type=\"text\" class=\"postTextField\"><button type=\"submit\">Post</button></form></div></div>")
     end;
 
 fun login() =
@@ -68,7 +68,7 @@ fun login() =
 	val loginSuccess = EmptyUser <> user andalso checkLogin(user, password)
     in
 	if(loginSuccess) then 
-	    generateChat()
+	    generateChat("Main")
 	else 
 	     print ("Wrong username or password :(")
         
