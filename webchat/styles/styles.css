@@ -113,7 +113,6 @@ button{
 	padding:5px 5px 5px 5px;
 	text-align:left;
 	float:right;
-	font-weight:bold;
 	margin-top:10px;
 }
 
@@ -131,6 +130,6 @@ button{
 
 .postTextField{
 	border:0px;
-	width:550px;
+	width:545px;
 	margin-right:5px;
 }
