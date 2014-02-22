@@ -44,6 +44,7 @@ function loadXMLDoc()
 			//var chatMessages = chatMessagesDiv.innerHTML;
     		var txtDocText = xmlhttp.responseText;
 			if(txtDocText != window.currentChatMessages){
+				document.getElementById('currentMsgInput').value = document.getElementById('postMessage').value;
 				document.getElementById('reloadChat').submit();
 			}
     	}
