@@ -1,5 +1,6 @@
 // JavaScript Document
 
+var websiteURL = "http://user.it.uu.se/~daek3938/webchat/";
 var currentChatMessages;
 
 function scrollChatWindow(){
@@ -27,7 +28,7 @@ function getChatMessages(){
 		
     	}
 	}
-	xmlhttp.open("POST","http://user.it.uu.se/~daek3938/webchat/chats/Main.txt",true);
+	xmlhttp.open("POST",websiteURL + "chats/Main.txt",true);
 	xmlhttp.send();
 }
 
@@ -44,8 +45,6 @@ function loadXMLDoc()
   	}
 	xmlhttp.onreadystatechange=function(){
   		if (xmlhttp.readyState==4 && xmlhttp.status==200){
-			//var chatMessagesDiv = document.getElementById("chatMessagesDiv");
-			//var chatMessages = chatMessagesDiv.innerHTML;
     		var txtDocText = xmlhttp.responseText;
 			if(txtDocText != window.currentChatMessages){
 				document.getElementById('currentMsgInput').value = document.getElementById('postTextField').value;
@@ -53,7 +52,7 @@ function loadXMLDoc()
 			}
     	}
 	}
-	xmlhttp.open("POST","http://user.it.uu.se/~daek3938/webchat/chats/Main.txt",true);
+	xmlhttp.open("POST",websiteURL + "chats/Main.txt",true);
 	xmlhttp.send();
 }
 
