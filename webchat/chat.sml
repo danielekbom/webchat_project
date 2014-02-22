@@ -55,7 +55,7 @@ fun generateChat(chat,name) =
     let
 	val messages = readMSGS(readChat("../webchat/chats/Main.txt"))
     in
-	print ("<div class=\"chatMainDiv\"><div class=\"chatMessagesDiv\"><h3>" ^ chat ^ " chat</h3>" ^ messages ^ " </div><div class=\"chatListDiv\">Chats<br /></div><br /><div class=\"yourProfileDiv\"><h3>Your profile</h3>Name: " ^ name ^ "</div><br /><div class=\"writeMessageDiv\"><form><input type=\"text\" class=\"postTextField\"><button type=\"submit\">Post</button></form></div></div>")
+	print ("<div class=\"chatMainDiv\"><div class=\"chatMessagesDiv\"><h3>" ^ chat ^ " chat</h3>" ^ messages ^ " </div><div class=\"chatListDiv\">Chats<br /></div><br /><div class=\"yourProfileDiv\"><h3>Your profile</h3>Name: " ^ name ^ "</div><br /><div class=\"writeMessageDiv\"><form name=\"postMessage\" method=\"post\" action=\"http://user.it.uu.se/cgi-bin/cgiwrap/daek3938/chat.cgi\"><input type=\"text\" name=\"postMessage\" class=\"postTextField\"><input type=\"hidden\" name=\"formType\" value=\"postMessage\"><input type=\"hidden\" name=\"userName\" value=\"" ^ name ^ "\"><button type=\"submit\" name=\"submit\" value=\"post\">Post</button></form></div></div>")
     end;
 
 fun login() =
@@ -88,7 +88,7 @@ fun signup() =
 		val successName = getUser(openIn "../webchat/users.txt", name) = ""
 		val outStream = openAppend ("../webchat/users.txt")
 	    in
-		if successName then (output (outStream, name ^ ">" ^ password ^ ">" ^ Date.toString(Date.fromTimeUniv(Time.now())) ^ ">" ^ "0" ^ "\n");                 closeOut(outStream); login())
+		if successName then (output (outStream, name ^ ">" ^ password ^ ">" ^ Date.toString(Date.fromTimeUniv(Time.now())) ^ ">" ^ "0" ^ "\n"); closeOut(outStream); login())
 		else 
 		     print ("User already exists")
 	    end
@@ -96,13 +96,28 @@ fun signup() =
 	     print ("Passwords do not match")
     end;
 
+fun saveMsgToFile (msg,chatName,userName) =
+	let
+		val outStream = openAppend ("../webchat/chats/" ^ chatName ^ ".txt")
+	in
+		(output (outStream, userName ^ ">" ^ Date.toString(Date.fromTimeUniv(Time.now())) ^ ">" ^ msg ^ ">"); closeOut (outStream))
+	end;
+	
+fun postMessage() =
+	let
+		val message = getOpt(cgi_field_string("postMessage"), "")
+		val userName = getOpt(cgi_field_string("userName"), "")
+	in
+		(saveMsgToFile(message,"Main",userName); generateChat("Main",userName))
+	end;
+
 fun main() =
     let
 	val formType = getOpt(cgi_field_string("formType"), "")
     in
 	(print "Content-type: text/html\n\n<!DOCTYPE html><html><head><meta charset=\"UTF-8\"><link rel=\"stylesheet\" type=\"text/css\" href=\"http://user.it.uu.se/~daek3938/webchat/styles/styles.css\" /></head><body>";
 	print "<div class=\"headerDiv\"></div>";
-	(if formType = "login" then login() else signup());
+	(if formType = "login" then login() else if formType = "signup" then signup() else if formType="postMessage" then postMessage() else raise Domain);
 	print "</body></html>")
     end;
 
