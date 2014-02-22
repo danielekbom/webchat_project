@@ -74,7 +74,7 @@ button{
 	width:815px;
 }
 
-.chatMessagesDiv{
+#chatMessagesDiv{
 	background-color:white;
 	width:620px;
 	height:400px;

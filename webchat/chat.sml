@@ -55,7 +55,7 @@ fun generateChat(chat,name) =
     let
 	val messages = readMSGS(readChat("../webchat/chats/Main.txt"))
     in
-	print ("<div class=\"chatMainDiv\"><div class=\"chatMessagesDiv\"><h3>" ^ chat ^ " chat</h3>" ^ messages ^ " </div><div class=\"chatListDiv\">Chats<br /></div><br /><div class=\"yourProfileDiv\"><h3>Your profile</h3>Name: " ^ name ^ "</div><br /><div class=\"writeMessageDiv\"><form name=\"postMessage\" method=\"post\" action=\"http://user.it.uu.se/cgi-bin/cgiwrap/daek3938/chat.cgi\"><input type=\"text\" name=\"postMessage\" class=\"postTextField\"><input type=\"hidden\" name=\"formType\" value=\"postMessage\"><input type=\"hidden\" name=\"userName\" value=\"" ^ name ^ "\"><button type=\"submit\" name=\"submit\" value=\"post\">Post</button></form></div></div>")
+	print ("<div class=\"chatMainDiv\"><div id=\"chatMessagesDiv\"><h3>" ^ chat ^ " chat</h3>" ^ messages ^ " </div><div class=\"chatListDiv\">Chats<br /></div><br /><div class=\"yourProfileDiv\"><h3>Your profile</h3>Name: " ^ name ^ "</div><br /><div class=\"writeMessageDiv\"><form name=\"postMessage\" method=\"post\" action=\"http://user.it.uu.se/cgi-bin/cgiwrap/daek3938/chat.cgi\"><input type=\"text\" name=\"postMessage\" class=\"postTextField\"><input type=\"hidden\" name=\"formType\" value=\"postMessage\"><input type=\"hidden\" name=\"userName\" value=\"" ^ name ^ "\"><button type=\"submit\" name=\"submit\" value=\"post\">Post</button></form></div></div><script src=\"http://user.it.uu.se/~daek3938/webchat/js/scripts.js\"></script>")
     end;
 
 fun login() =
