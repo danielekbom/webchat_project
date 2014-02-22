@@ -55,7 +55,7 @@ fun generateChat(chat,name) =
     let
 	val messages = readMSGS(readChat("../webchat/chats/Main.txt"))
     in
-	print ("<div class=\"chatMainDiv\"><div id=\"chatMessagesDiv\"><h3>" ^ chat ^ " chat</h3>" ^ messages ^ " </div><div id=\"chatListDiv\">Chats<br /></div><br /><div class=\"yourProfileDiv\"><h3>Your profile</h3>Name: " ^ name ^ "</div><br /><div class=\"writeMessageDiv\"><form name=\"postMessage\" method=\"post\" action=\"http://user.it.uu.se/cgi-bin/cgiwrap/daek3938/chat.cgi\"><input type=\"text\" name=\"postMessage\" class=\"postTextField\"><input type=\"hidden\" name=\"formType\" value=\"postMessage\"><input type=\"hidden\" name=\"userName\" value=\"" ^ name ^ "\"><button type=\"submit\" name=\"submit\" value=\"post\">Post</button></form></div></div><script src=\"http://user.it.uu.se/~daek3938/webchat/js/scripts.js\"></script>")
+	print ("<div class=\"chatMainDiv\"><div id=\"chatMessagesDiv\"><h3>" ^ chat ^ " chat</h3>" ^ messages ^ " </div><div id=\"chatListDiv\">Chats<br /></div><br /><div class=\"yourProfileDiv\"><h3>Your profile</h3>Name: " ^ name ^ "</div><br /><div class=\"writeMessageDiv\"><form name=\"postMessage\" method=\"post\" action=\"http://user.it.uu.se/cgi-bin/cgiwrap/daek3938/chat.cgi\"><input type=\"text\" name=\"postMessage\" class=\"postTextField\"><input type=\"hidden\" name=\"formType\" value=\"postMessage\"><input type=\"hidden\" name=\"userName\" value=\"" ^ name ^ "\"><button type=\"submit\" name=\"submit\" value=\"post\">Post</button></form></div></div><form name=\"reloadChat\" id=\"reloadChat\" method=\"post\" action=\"http://user.it.uu.se/cgi-bin/cgiwrap/daek3938/chat.cgi\"><input type=\"hidden\" name=\"formType\" value=\"reloadChat\"><input type=\"hidden\" name=\"username\" value=\"" ^ name ^ "\"></form><script src=\"http://user.it.uu.se/~daek3938/webchat/js/scripts.js\"></script>")
     end;
 
 fun login() =
@@ -114,10 +114,11 @@ fun postMessage() =
 fun main() =
     let
 	val formType = getOpt(cgi_field_string("formType"), "")
+	val name = getOpt(cgi_field_string("username"), "")
     in
 	(print "Content-type: text/html\n\n<!DOCTYPE html><html><head><meta charset=\"UTF-8\"><link rel=\"stylesheet\" type=\"text/css\" href=\"http://user.it.uu.se/~daek3938/webchat/styles/styles.css\" /></head><body>";
 	print "<div class=\"headerDiv\"></div>";
-	(if formType = "login" then login() else if formType = "signup" then signup() else if formType="postMessage" then postMessage() else raise Domain);
+	(if formType = "login" then login() else if formType = "signup" then signup() else if formType="postMessage" then postMessage() else if formType="reloadChat" then generateChat("Main",name) else raise Domain);
 	print "</body></html>")
     end;
 
