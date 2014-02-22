@@ -95,7 +95,7 @@ button{
 	margin-left:5px;
 }
 
-.chatListDiv{
+#chatListDiv{
 	background-color:white;
 	width:150px;
 	height:200px;
