@@ -44,7 +44,7 @@ fun readChat chatName =
 	  | readChat'(x::y::z::xs) = MSG(x, y, z)::readChat'(xs)
 	  | readChat'(x::xs) = if x = "\n" then [] else raise Hej 
     in
-	(closeIn(chatStream); Chat(chatName, readChat'(map implode(splitList(explode(totalChat), [[]], #">")))))
+	(closeIn(chatStream); Chat(chatName, readChat'(map implode(splitList(explode(totalChat), [[]], #"@")))))
     end;
 
 fun readMSG(MSG(x, y, z)) = (x ^ " " ^ y ^ ":<br /><i>" ^ z ^ "</i><br /><div class=\"chatPostLine\"></div>")
@@ -104,7 +104,7 @@ fun saveMsgToFile (msg,chatName,userName) =
 	let
 		val outStream = openAppend ("../webchat/chats/" ^ chatName ^ ".txt")
 	in
-		(output (outStream, userName ^ ">" ^ Date.toString(Date.fromTimeUniv(Time.now())) ^ ">" ^ msg ^ ">"); closeOut (outStream))
+		(output (outStream, userName ^ "@" ^ Date.toString(Date.fromTimeUniv(Time.now())) ^ "@" ^ msg ^ "@"); closeOut (outStream))
 	end;
 	
 fun postMessage() =
