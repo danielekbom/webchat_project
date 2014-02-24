@@ -4,7 +4,7 @@ open TextIO;
 val cfgStream = openIn("../webchat/url.cfg");
 val websiteURL = inputLine;
 val cgiURL = inputLine;
-closeIn(cfgStream);
+val a = closeIn(cfgStream);
 
 
 datatype user = User of (string * string * string * int) | EmptyUser
