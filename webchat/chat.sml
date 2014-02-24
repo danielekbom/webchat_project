@@ -2,8 +2,8 @@ open Mosmlcgi;
 open TextIO;
 
 val cfgStream = openIn("../webchat/url.cfg");
-val websiteURL = inputLine;
-val cgiURL = inputLine;
+val websiteURL = inputLine(cfgStream);
+val cgiURL = inputLine(cfgStream);
 val a = closeIn(cfgStream);
 
 
