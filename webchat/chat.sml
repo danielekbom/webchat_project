@@ -1,8 +1,11 @@
-val websiteURL = "http://user.it.uu.se/~daek3938/webchat/";
-val cgiURL = "http://user.it.uu.se/cgi-bin/cgiwrap/daek3938/";
-
 open Mosmlcgi;
 open TextIO;
+
+val cfgStream = openIn("../webchat/url.cfg");
+val websiteURL = inputLine;
+val cgiURL = inputLine;
+closeIn(cfgStream);
+
 
 datatype user = User of (string * string * string * int) | EmptyUser
 datatype message = MSG of (string * string * string)
