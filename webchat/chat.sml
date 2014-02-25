@@ -106,35 +106,34 @@ fun readMSGS (Chat(name, [])) = ""
   | readMSGS _ = raise Domain
 
 
-fun generateChat(chat,name) =
+fun generateChat(chat,user) =
     let
 	val messages = readMSGS(readChat("../webchat/chats/Main.txt"))
 	val currentMsgInput = getOpt(cgi_field_string("currentMsgInput"), "")
+	val User(userName,_,date,postCount) = user
     in
 	print ("<div class=\"chatMainDiv\"><div id=\"chatMessagesDiv\"><h3>"
 	^ chat ^ " chat</h3>" 
 	^ messages ^ " </div><div id=\"chatListDiv\">Chats<br /></div><br /><div class=\"yourProfileDiv\"><h3>Your profile</h3>Name: " 
-	^ name ^ "</div><br /><div class=\"writeMessageDiv\"><form name=\"postMessage\" method=\"post\" action=\""
+	^ userName ^ "<br />Posts: " ^ Int.toString(postCount) ^ "</div><br /><div class=\"writeMessageDiv\"><form name=\"postMessage\" method=\"post\" action=\""
 	^ cgiURL ^ "chat.cgi\"><input type=\"text\" name=\"postTextField\" id=\"postTextField\" class=\"postTextField\" value=\""
-	^ currentMsgInput ^ "\" onfocus=\"this.value = this.value;\"><input type=\"hidden\" name=\"formType\" value=\"postMessage\"><input type=\"hidden\" name=\"userName\" value=\""
-	^ name ^ "\"><button type=\"submit\" name=\"submit\" value=\"post\">Post</button></form></div></div><form name=\"reloadChat\" id=\"reloadChat\" method=\"post\" action=\""
+	^ currentMsgInput ^ "\" onfocus=\"this.value = this.value;\"><input type=\"hidden\" name=\"formType\" value=\"postMessage\"><input type=\"hidden\" name=\"username\" value=\""
+	^ userName ^ "\"><button type=\"submit\" name=\"submit\" value=\"post\">Post</button></form></div></div><form name=\"reloadChat\" id=\"reloadChat\" method=\"post\" action=\""
 	^ cgiURL ^ "chat.cgi\"><input type=\"hidden\" name=\"formType\" value=\"reloadChat\"><input type=\"hidden\" name=\"username\" value=\""
-	^ name ^ "\"><input type=\"hidden\" name=\"currentMsgInput\" id=\"currentMsgInput\" value=\""
+	^ userName ^ "\"><input type=\"hidden\" name=\"currentMsgInput\" id=\"currentMsgInput\" value=\""
 	^ currentMsgInput ^ "\"></form><script src=\""
 	^ websiteURL ^ "js/scripts.js\"></script>")
     end;
 
-fun login() =
+fun login(user) =
     let
 	val name = getOpt(cgi_field_string("username"), "")
 	val password = getOpt(cgi_field_string("password"), "")
-	val userList = getUser(openIn "../webchat/users.txt", name) 
-	val user = returnUser(userList)
 	
 	val loginSuccess = EmptyUser <> user andalso checkLogin(user, password)
     in
 	if(loginSuccess) then 
-	    generateChat("Main",name)
+	    generateChat("Main",user)
 	else 
 	     print ("Wrong username or password :(")
         
@@ -153,8 +152,9 @@ fun signup() =
 	    let
 		val successName = getUser(openIn "../webchat/users.txt", name) = ""
 		val outStream = openAppend ("../webchat/users.txt")
+		val date = Date.toString(Date.fromTimeUniv(Time.now()))
 	    in
-		if successName then (output (outStream, name ^ ">" ^ password ^ ">" ^ Date.toString(Date.fromTimeUniv(Time.now())) ^ ">" ^ "0" ^ "\n"); closeOut(outStream); login())
+		if successName then (output (outStream, name ^ ">" ^ password ^ ">" ^ date ^ ">" ^ "0" ^ "\n"); closeOut(outStream); login(User(name,password,date,0)))
 		else 
 		     print ("User already exists")
 	    end
@@ -169,24 +169,26 @@ fun saveMsgToFile (msg,chatName,userName) =
 		(output (outStream, userName ^ "@" ^ Date.toString(Date.fromTimeUniv(Time.now())) ^ "@" ^ msg ^ "@"); closeOut (outStream))
 	end;
 	
-fun postMessage() =
+fun postMessage(user) =
 	let
 		val message = getOpt(cgi_field_string("postTextField"), "")
 		val filteredMsg = filterString(message)
 		val smileysAddedMsg = insertSmiley(explode(filteredMsg))
 		val userName = getOpt(cgi_field_string("userName"), "")
 	in
-		(saveMsgToFile(smileysAddedMsg,"Main",userName); generateChat("Main",userName))
+		(saveMsgToFile(smileysAddedMsg,"Main",userName); generateChat("Main",user))
 	end;
 
 fun main() =
     let
 	val formType = getOpt(cgi_field_string("formType"), "")
 	val name = getOpt(cgi_field_string("username"), "")
+	val userList = getUser(openIn "../webchat/users.txt", name) 
+	val user = returnUser(userList)
     in
 	(print ("Content-type: text/html\n\n<!DOCTYPE html><html><head><meta charset=\"UTF-8\"><link rel=\"stylesheet\" type=\"text/css\" href=\"" ^ websiteURL ^ "styles/styles.css\" /></head><body>");
 	print "<div class=\"headerDiv\"></div>";
-	(if formType = "login" then login() else if formType = "signup" then signup() else if formType="postMessage" then postMessage() else if formType="reloadChat" then generateChat("Main",name) else raise Domain);
+	(if formType = "login" then login(user) else if formType = "signup" then signup() else if formType="postMessage" then postMessage(user) else if formType="reloadChat" then generateChat("Main",user) else raise Domain);
 	print "</body></html>")
     end;
 
