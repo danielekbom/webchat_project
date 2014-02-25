@@ -29,7 +29,7 @@ fun filterChar #"<" = "&lt;"
   | filterChar #"&" = "&amp;"
   | filterChar ch = Char.toString(ch);
   
-fun filterString(filterString) = foldr (fn (x,y) => filterChar(x) ^ y) "" (explode(filterString))
+fun filterString(s) = foldr (fn (x,y) => filterChar(x) ^ y) "" (explode(s))
   
 fun getName [] = []
   | getName(x::xs) = if(x = #">") then [] else x::getName(xs);
