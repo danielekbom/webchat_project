@@ -134,3 +134,8 @@ button{
 	width:545px;
 	margin-right:5px;
 }
+
+.smiley{
+	height:16px;
+	vertical-align:middle;
+}

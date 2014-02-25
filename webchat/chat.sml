@@ -13,6 +13,18 @@ datatype chat = Chat of (string * message list) | EmptyChat
 
 exception Hej;
 
+fun getSmiley (#":",#"P") = "<img class=\"smiley\" src=\"" ^ websiteURL ^ "styles/images/smileys/blub.jpg\" />"
+  | getSmiley (#":",#"D") = "<img class=\"smiley\" src=\"" ^ websiteURL ^ "styles/images/smileys/happy.jpg\" />"
+  | getSmiley (#":",#")") = "<img class=\"smiley\" src=\"" ^ websiteURL ^ "styles/images/smileys/original.jpg\" />"
+  | getSmiley (#":",#"(") = "<img class=\"smiley\" src=\"" ^ websiteURL ^ "styles/images/smileys/sad.jpg\" />"
+  | getSmiley (#":",#"O") = "<img class=\"smiley\" src=\"" ^ websiteURL ^ "styles/images/smileys/suprised.jpg\" />"
+  | getSmiley _ = raise Domain
+
+fun insertSmiley [] = ""
+  | insertSmiley (x::[]) = Char.toString(x)
+  | insertSmiley (x::y::[]) = if (x = #":" andalso (y = #"P" orelse y = #"D" orelse y = #")" orelse y = #"(" orelse y = #"O")) then getSmiley(x,y) ^ "" else Char.toString(x) ^ Char.toString(y)
+  | insertSmiley (x::y::tail) = if (x = #":" andalso (y = #"P" orelse y = #"D" orelse y = #")" orelse y = #"(" orelse y = #"O")) then getSmiley(x,y) ^ insertSmiley(tail) else Char.toString(x) ^ insertSmiley(y::tail) 
+
 fun getName [] = []
   | getName(x::xs) = if(x = #">") then [] else x::getName(xs);
 
@@ -123,9 +135,10 @@ fun saveMsgToFile (msg,chatName,userName) =
 fun postMessage() =
 	let
 		val message = getOpt(cgi_field_string("postTextField"), "")
+		val smileysAddedMsg = insertSmiley(explode(message))
 		val userName = getOpt(cgi_field_string("userName"), "")
 	in
-		(saveMsgToFile(message,"Main",userName); generateChat("Main",userName))
+		(saveMsgToFile(smileysAddedMsg,"Main",userName); generateChat("Main",userName))
 	end;
 
 fun main() =
