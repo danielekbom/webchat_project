@@ -24,7 +24,7 @@ fun insertSmiley [] = ""
   | insertSmiley (x::[]) = Char.toString(x)
   | insertSmiley ((#":")::(#":")::tail) = ":" ^ insertSmiley(#":"::tail)
   | insertSmiley ((#":")::y::tail) = getSmiley(y) ^ insertSmiley(tail)
-  | insertSmiley (x::y::tail) = implode([x,y]) ^ insertSmiley(tail)
+  | insertSmiley (x::tail) = implode([x]) ^ insertSmiley(tail)
 
 fun filterChar #"<" = "&lt;"
   | filterChar #"&" = "&amp;"
