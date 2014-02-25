@@ -14,15 +14,18 @@ val a = closeIn(cfgStream);
  *)
 datatype user = User of (string * string * string * int) | EmptyUser
 
-(* REPRESENTATION CONVENTION:
+(* REPRESENTATION CONVENTION: Represents a message in a chat forum
+   MSG(username, postdate, text) - A message written by a user with name username at date postdate with text as the content 
  
- * REPRESENTATION INVARIANT: 
+ * REPRESENTATION INVARIANT: None 
  *)
 datatype message = MSG of (string * string * string)
 
-(* REPRESENTATION CONVENTION:
+(* REPRESENTATION CONVENTION: Represents a forum in the web chat
+   Chat(name, msgList) - A forum with name and msgList as a list of messages
+   EmptyChat - Represents and empty chat with no name
 	
- * REPRESENTATION INVARIANT:
+ * REPRESENTATION INVARIANT: None
  *)
 datatype chat = Chat of (string * message list) | EmptyChat
 
