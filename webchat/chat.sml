@@ -168,6 +168,14 @@ fun saveMsgToFile (msg,chatName,userName) =
 	in
 		(output (outStream, userName ^ "@" ^ Date.toString(Date.fromTimeUniv(Time.now())) ^ "@" ^ msg ^ "@"); closeOut (outStream))
 	end;
+
+fun addToPostCount(User(Name, Pass, date, post) =
+	let
+		
+		val outStream = openAppend ("../webchat/users.txt")
+	in
+	 
+	end;
 	
 fun postMessage(user) =
 	let
@@ -176,7 +184,7 @@ fun postMessage(user) =
 		val smileysAddedMsg = insertSmiley(explode(filteredMsg))
 		val userName = getOpt(cgi_field_string("userName"), "")
 	in
-		(saveMsgToFile(smileysAddedMsg,"Main",userName); generateChat("Main",user))
+		(saveMsgToFile(smileysAddedMsg,"Main",userName); addToPostCount(); generateChat("Main",user))
 	end;
 
 fun main() =
