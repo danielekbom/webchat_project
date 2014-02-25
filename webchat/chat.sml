@@ -13,17 +13,18 @@ datatype chat = Chat of (string * message list) | EmptyChat
 
 exception Hej;
 
-fun getSmiley (#":",#"P") = "<img class=\"smiley\" src=\"" ^ websiteURL ^ "styles/images/smileys/blub.jpg\" />"
-  | getSmiley (#":",#"D") = "<img class=\"smiley\" src=\"" ^ websiteURL ^ "styles/images/smileys/happy.jpg\" />"
-  | getSmiley (#":",#")") = "<img class=\"smiley\" src=\"" ^ websiteURL ^ "styles/images/smileys/original.jpg\" />"
-  | getSmiley (#":",#"(") = "<img class=\"smiley\" src=\"" ^ websiteURL ^ "styles/images/smileys/sad.jpg\" />"
-  | getSmiley (#":",#"O") = "<img class=\"smiley\" src=\"" ^ websiteURL ^ "styles/images/smileys/suprised.jpg\" />"
-  | getSmiley _ = raise Domain
-
+fun getSmiley (#"P") = "<img class=\"smiley\" src=\"" ^ websiteURL ^ "styles/images/smileys/blub.jpg\" />"
+  | getSmiley (#"D") = "<img class=\"smiley\" src=\"" ^ websiteURL ^ "styles/images/smileys/happy.jpg\" />"
+  | getSmiley (#")") = "<img class=\"smiley\" src=\"" ^ websiteURL ^ "styles/images/smileys/original.jpg\" />"
+  | getSmiley (#"(") = "<img class=\"smiley\" src=\"" ^ websiteURL ^ "styles/images/smileys/sad.jpg\" />"
+  | getSmiley (#"O") = "<img class=\"smiley\" src=\"" ^ websiteURL ^ "styles/images/smileys/suprised.jpg\" />"
+  | getSmiley (x) = ":" ^ Char.toString(x)
+ 
 fun insertSmiley [] = ""
   | insertSmiley (x::[]) = Char.toString(x)
-  | insertSmiley (x::y::[]) = if (x = #":" andalso (y = #"P" orelse y = #"D" orelse y = #")" orelse y = #"(" orelse y = #"O")) then getSmiley(x,y) ^ "" else Char.toString(x) ^ Char.toString(y)
-  | insertSmiley (x::y::tail) = if (x = #":" andalso (y = #"P" orelse y = #"D" orelse y = #")" orelse y = #"(" orelse y = #"O")) then getSmiley(x,y) ^ insertSmiley(tail) else Char.toString(x) ^ insertSmiley(y::tail) 
+  | insertSmiley ((#":")::(#":")::tail) = ":" ^ insertSmiley(#":"::tail)
+  | insertSmiley ((#":")::y::tail) = getSmiley(y) ^ insertSmiley(tail)
+  | insertSmiley (x::y::tail) = implode([x,y]) ^ insertSmiley(tail)
 
 fun filterChar #"<" = "&lt;"
   | filterChar #"&" = "&amp;"
