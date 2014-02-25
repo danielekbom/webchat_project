@@ -25,6 +25,13 @@ fun insertSmiley [] = ""
   | insertSmiley (x::y::[]) = if (x = #":" andalso (y = #"P" orelse y = #"D" orelse y = #")" orelse y = #"(" orelse y = #"O")) then getSmiley(x,y) ^ "" else Char.toString(x) ^ Char.toString(y)
   | insertSmiley (x::y::tail) = if (x = #":" andalso (y = #"P" orelse y = #"D" orelse y = #")" orelse y = #"(" orelse y = #"O")) then getSmiley(x,y) ^ insertSmiley(tail) else Char.toString(x) ^ insertSmiley(y::tail) 
 
+fun filterChar #"<" = "&lt;"
+  | filterChar #"&" = "&amp;"
+  | filterChar ch = Char.toString(ch);
+
+fun filterChars [] = ""
+  | filterChars (x::xs) = filterChar(x) ^ filterChars(xs)
+  
 fun getName [] = []
   | getName(x::xs) = if(x = #">") then [] else x::getName(xs);
 
@@ -135,7 +142,8 @@ fun saveMsgToFile (msg,chatName,userName) =
 fun postMessage() =
 	let
 		val message = getOpt(cgi_field_string("postTextField"), "")
-		val smileysAddedMsg = insertSmiley(explode(message))
+		val filteredMsg = filterChars(explode(message))
+		val smileysAddedMsg = insertSmiley(explode(filteredMsg))
 		val userName = getOpt(cgi_field_string("userName"), "")
 	in
 		(saveMsgToFile(smileysAddedMsg,"Main",userName); generateChat("Main",userName))
