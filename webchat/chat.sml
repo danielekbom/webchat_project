@@ -28,9 +28,8 @@ fun insertSmiley [] = ""
 fun filterChar #"<" = "&lt;"
   | filterChar #"&" = "&amp;"
   | filterChar ch = Char.toString(ch);
-
-fun filterChars [] = ""
-  | filterChars (x::xs) = filterChar(x) ^ filterChars(xs)
+  
+fun filterString(filterString) = foldr (fn (x,y) => filterChar(x) ^ y) "" (explode(filterString))
   
 fun getName [] = []
   | getName(x::xs) = if(x = #">") then [] else x::getName(xs);
@@ -142,7 +141,7 @@ fun saveMsgToFile (msg,chatName,userName) =
 fun postMessage() =
 	let
 		val message = getOpt(cgi_field_string("postTextField"), "")
-		val filteredMsg = filterChars(explode(message))
+		val filteredMsg = filterString(message)
 		val smileysAddedMsg = insertSmiley(explode(filteredMsg))
 		val userName = getOpt(cgi_field_string("userName"), "")
 	in
