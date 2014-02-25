@@ -85,7 +85,7 @@ fun returnUser l =
       | _ => EmptyUser
 
 fun checkLogin (User(_,y,_,_), input) = y = input
-  | checkLogin _ = false
+  | checkLogin _ = raise Domain
 
 fun readChat chatName = 
     let
@@ -168,14 +168,30 @@ fun saveMsgToFile (msg,chatName,userName) =
 	in
 		(output (outStream, userName ^ "@" ^ Date.toString(Date.fromTimeUniv(Time.now())) ^ "@" ^ msg ^ "@"); closeOut (outStream))
 	end;
-
-fun addToPostCount(User(Name, Pass, date, post) =
-	let
 		
-		val outStream = openAppend ("../webchat/users.txt")
+fun replaceUserInfo(x::y::z::v::xs, i, name, change) = if x = name then 
+		case i of 
+		  1 => change::y::z::v::xs (*should not be changed*)
+		| 2 => x::change::z::v::xs(*should not be changed*)
+		| 3 => x::y::change::v::xs (*should not be changed*)
+		| 4 => x::y::z::change::xs
+		| _ => raise Domain
+	else 
+		x::y::z::v::replaceUserInfo(xs, i, name, change)
+  | replaceUserInfo(_, _, _, _) = raise Domain
+	
+	
+fun addToPostCount(User(name, pass, date, post)) =
+	let
+		val userStream = openIn("../webchat/users.txt")
+		val usersStringBlown = explode(inputAll(userStream))
+		val newText = String.concatWith ">" (replaceUserInfo(map implode (splitList(explode(totalChat), [[]], #">")), 4, name, Int.toString(post+1)))
+		val closeStream = closeIn(userStream)
+		val openUserStream = openOut("../webchat/users.txt")
 	in
-	 
-	end;
+		(output(openUserStream, newText); closeOut(openUserStream))
+	end
+  | addToPostCount(EmptyUser) = raise Domain
 	
 fun postMessage(user) =
 	let
@@ -184,7 +200,7 @@ fun postMessage(user) =
 		val smileysAddedMsg = insertSmiley(explode(filteredMsg))
 		val userName = getOpt(cgi_field_string("userName"), "")
 	in
-		(saveMsgToFile(smileysAddedMsg,"Main",userName); addToPostCount(); generateChat("Main",user))
+		(saveMsgToFile(smileysAddedMsg,"Main",userName); addToPostCount(user); generateChat("Main",user))
 	end;
 
 fun main() =
