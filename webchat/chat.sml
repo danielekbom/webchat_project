@@ -6,9 +6,24 @@ val websiteURL = inputLine(cfgStream);
 val cgiURL = inputLine(cfgStream);
 val a = closeIn(cfgStream);
 
-
+(* REPRESENTATION CONVENTION: Represents a user of a chat forum
+   User(name, password, date, postCount) - A user with name, password, a creation date and a post count
+   EmtptyUser - An empty user
+	
+ * REPRESENTATION INVARIANT: name is unique (no other user can have the same name), length of password ?, postCount >= 0
+ *)
 datatype user = User of (string * string * string * int) | EmptyUser
+
+(* REPRESENTATION CONVENTION:
+ 
+ * REPRESENTATION INVARIANT: 
+ *)
 datatype message = MSG of (string * string * string)
+
+(* REPRESENTATION CONVENTION:
+	
+ * REPRESENTATION INVARIANT:
+ *)
 datatype chat = Chat of (string * message list) | EmptyChat
 
 exception Hej;
