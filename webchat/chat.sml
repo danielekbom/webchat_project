@@ -29,8 +29,6 @@ datatype message = MSG of (string * string * string)
  *)
 datatype chat = Chat of (string * message list) | EmptyChat
 
-exception Hej;
-
 fun getSmiley (#"P") = "<img class=\"smiley\" src=\"" ^ websiteURL ^ "styles/images/smileys/blub.jpg\" />"
   | getSmiley (#"D") = "<img class=\"smiley\" src=\"" ^ websiteURL ^ "styles/images/smileys/happy.jpg\" />"
   | getSmiley (#")") = "<img class=\"smiley\" src=\"" ^ websiteURL ^ "styles/images/smileys/original.jpg\" />"
@@ -50,9 +48,23 @@ fun filterChar #"<" = "&lt;"
   
 fun filterString(s) = foldr (fn (x,y) => filterChar(x) ^ y) "" (explode(s))
   
+(* getName x 
+ * TYPE: char list -> char list
+ * PRE: none
+ * POST: The name from x which is the characters from the start to the first ">" character
+ *
+ * VARIANT: length of x
+ *)
 fun getName [] = []
   | getName(x::xs) = if(x = #">") then [] else x::getName(xs);
 
+(* getUser(stream, name) 
+ * TYPE: instream * string -> string
+ * PRE: none
+ * POST: 
+ *
+ * VARIANT: length of x
+ *)
 fun getUser(is, name) = 
     let
 	val cond = endOfStream(is);
@@ -82,7 +94,7 @@ fun readChat chatName =
 	
 	fun readChat'([]) = []
 	  | readChat'(x::y::z::xs) = MSG(x, y, z)::readChat'(xs)
-	  | readChat'(x::xs) = if x = "\n" then [] else raise Hej 
+	  | readChat'(x::xs) = if x = "\n" then [] else raise Domain 
     in
 	(closeIn(chatStream); Chat(chatName, readChat'(map implode(splitList(explode(totalChat), [[]], #"@")))))
     end;
