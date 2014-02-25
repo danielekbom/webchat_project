@@ -33,17 +33,17 @@ fun getSmiley (#"P") = "<img class=\"smiley\" src=\"" ^ websiteURL ^ "styles/ima
   | getSmiley (#")") = "<img class=\"smiley\" src=\"" ^ websiteURL ^ "styles/images/smileys/original.jpg\" />"
   | getSmiley (#"(") = "<img class=\"smiley\" src=\"" ^ websiteURL ^ "styles/images/smileys/sad.jpg\" />"
   | getSmiley (#"O") = "<img class=\"smiley\" src=\"" ^ websiteURL ^ "styles/images/smileys/suprised.jpg\" />"
-  | getSmiley (x) = ":" ^ Char.toString(x)
+  | getSmiley (x) = ":" ^ implode([x]) (*Char.toString(x)*)
  
 fun insertSmiley [] = ""
-  | insertSmiley (x::[]) = Char.toString(x)
+  | insertSmiley (x::[]) = implode([x]) (*Char.toString(x)*)
   | insertSmiley ((#":")::(#":")::tail) = ":" ^ insertSmiley(#":"::tail)
   | insertSmiley ((#":")::y::tail) = getSmiley(y) ^ insertSmiley(tail)
   | insertSmiley (x::tail) = implode([x]) ^ insertSmiley(tail)
 
 fun filterChar #"<" = "&lt;"
   | filterChar #"&" = "&amp;"
-  | filterChar ch = Char.toString(ch);
+  | filterChar ch = implode([ch]) (*Char.toString(ch)*);
   
 fun filterString(s) = foldr (fn (x,y) => filterChar(x) ^ y) "" (explode(s))
   
