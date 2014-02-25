@@ -2,8 +2,8 @@ open Mosmlcgi;
 open TextIO;
 
 val cfgStream = openIn("../webchat/url.cfg");
-val websiteURL = inputLine(cfgStream);
-val cgiURL = inputLine(cfgStream);
+val websiteURL = implode(List.filter (fn x => x <> #"\n") (explode(inputLine(cfgStream))));
+val cgiURL = implode(List.filter (fn x => x <> #"\n") (explode(inputLine(cfgStream))));
 val a = closeIn(cfgStream);
 
 (* REPRESENTATION CONVENTION: Represents a user of a chat forum
