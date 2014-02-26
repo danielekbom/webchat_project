@@ -95,7 +95,7 @@ fun readChat chatName =
 	
 	fun readChat'([]) = []
 	  | readChat'(x::y::z::xs) = MSG(x, y, z)::readChat'(xs)
-	  | readChat'(x::xs) = if x = "\n" then [] else raise Domain 
+	  | readChat'(x::xs) = if x = "\n" then [] else []
     in
 	(closeIn(chatStream); Chat(chatName, readChat'(map implode(splitList(explode(totalChat), [[]], #"@")))))
     end;
