@@ -12,7 +12,7 @@ val a = closeIn(cfgStream);
 	
  * REPRESENTATION INVARIANT: name is unique (no other user can have the same name), length of password ?, postCount >= 0
  *)
-datatype user = User of (string * string * string * int) | EmptyUser
+datatype user = User of (string * string * string * int)
 
 (* REPRESENTATION CONVENTION: Represents a message in a chat forum
    MSG(username, postdate, text) - A message written by a user with name username at date postdate with text as the content 
@@ -46,7 +46,7 @@ fun filterChar #"<" = "&lt;"
   | filterChar #"&" = "&amp;"
   | filterChar ch = implode([ch]) (*Char.toString(ch)*);
   
-fun filterString(s) = foldr (fn (x,y) => filterChar(x) ^ y) "" (explode(s))
+fun filterString(sList) = foldr (fn (x,y) => filterChar(x) ^ y) "" (explode(sList))
   
 (* getName x 
  * TYPE: char list -> char list
@@ -82,10 +82,9 @@ fun splitList ([], y, _) = y
 fun returnUser l =
     case (map implode(splitList(explode(l),[[]], #">"))) of
 	x::y::z::v::_ => User(x, y, z, valOf(Int.fromString(v)))
-      | _ => EmptyUser
+      | _ => raise Domain
 
 fun checkLogin (User(_,y,_,_), input) = y = input
-  | checkLogin _ = raise Domain
 
 fun readChat chatName = 
     let
@@ -106,60 +105,56 @@ fun readMSGS (Chat(name, [])) = ""
   | readMSGS _ = raise Domain
 
 
-fun generateChat(chat,user) =
-    let
-	val messages = readMSGS(readChat("../webchat/chats/Main.txt"))
-	val currentMsgInput = getOpt(cgi_field_string("currentMsgInput"), "")
-	val User(userName,_,date,postCount) = user
-    in
-	print ("<div class=\"chatMainDiv\"><div id=\"chatMessagesDiv\"><h3>"
-	^ chat ^ " chat</h3>" 
-	^ messages ^ " </div><div id=\"chatListDiv\">Chats<br /></div><br /><div class=\"yourProfileDiv\"><h3>Your profile</h3>Name: " 
-	^ userName ^ "<br />Posts: " ^ Int.toString(postCount) ^ "</div><br /><div class=\"writeMessageDiv\"><form name=\"postMessage\" method=\"post\" action=\""
-	^ cgiURL ^ "chat.cgi\"><input type=\"text\" name=\"postTextField\" id=\"postTextField\" class=\"postTextField\" value=\""
-	^ currentMsgInput ^ "\" onfocus=\"this.value = this.value;\"><input type=\"hidden\" name=\"formType\" value=\"postMessage\"><input type=\"hidden\" name=\"username\" value=\""
-	^ userName ^ "\"><button type=\"submit\" name=\"submit\" value=\"post\">Post</button></form></div></div><form name=\"reloadChat\" id=\"reloadChat\" method=\"post\" action=\""
-	^ cgiURL ^ "chat.cgi\"><input type=\"hidden\" name=\"formType\" value=\"reloadChat\"><input type=\"hidden\" name=\"username\" value=\""
-	^ userName ^ "\"><input type=\"hidden\" name=\"currentMsgInput\" id=\"currentMsgInput\" value=\""
-	^ currentMsgInput ^ "\"></form><script src=\""
-	^ websiteURL ^ "js/scripts.js\"></script>")
-    end;
+fun generateChat(chat,User(userName,_,date,postCount)) = 
+	let
+		val messages = readMSGS(readChat("../webchat/chats/Main.txt"))
+		val currentMsgInput = getOpt(cgi_field_string("currentMsgInput"), "")
+	in
+		print ("<div class=\"chatMainDiv\"><div id=\"chatMessagesDiv\"><h3>"
+		^ chat ^ " chat</h3>" 
+		^ messages ^ " </div><div id=\"chatListDiv\">Chats<br /></div><br /><div class=\"yourProfileDiv\"><h3>Your profile</h3>Name: " 
+		^ userName ^ "<br />Posts: " ^ Int.toString(postCount) ^ "</div><br /><div class=\"writeMessageDiv\"><form name=\"postMessage\" method=\"post\" action=\""
+		^ cgiURL ^ "chat.cgi\"><input type=\"text\" name=\"postTextField\" id=\"postTextField\" class=\"postTextField\" value=\""
+		^ currentMsgInput ^ "\" onfocus=\"this.value = this.value;\"><input type=\"hidden\" name=\"formType\" value=\"postMessage\"><input type=\"hidden\" name=\"username\" value=\""
+		^ userName ^ "\"><button type=\"submit\" name=\"submit\" value=\"post\">Post</button></form></div></div><form name=\"reloadChat\" id=\"reloadChat\" method=\"post\" action=\""
+		^ cgiURL ^ "chat.cgi\"><input type=\"hidden\" name=\"formType\" value=\"reloadChat\"><input type=\"hidden\" name=\"username\" value=\""
+		^ userName ^ "\"><input type=\"hidden\" name=\"currentMsgInput\" id=\"currentMsgInput\" value=\""
+		^ currentMsgInput ^ "\"></form><script src=\""
+		^ websiteURL ^ "js/scripts.js\"></script>")
+	end
 
 fun login(user) =
     let
-	val name = getOpt(cgi_field_string("username"), "")
-	val password = getOpt(cgi_field_string("password"), "")
-	
-	val loginSuccess = EmptyUser <> user andalso checkLogin(user, password)
+		val name = getOpt(cgi_field_string("username"), "")
+		val password = getOpt(cgi_field_string("password"), "")
+		val loginSuccess = checkLogin(user, password)
     in
-	if(loginSuccess) then 
-	    generateChat("Main",user)
-	else 
-	     print ("Wrong username or password :(")
-        
+		if(loginSuccess) then 
+			generateChat("Main",user)
+		else 
+			print ("Wrong username or password :(")
     end;
 
 fun signup() =
     let
-	val name = getOpt(cgi_field_string("username"), "")
-	val password = getOpt(cgi_field_string("password"), "")
-        val passwordRepeat = getOpt(cgi_field_string("repeatPassword"), "")
-        val successPassword = password = passwordRepeat
-			      
-			      
+		val x = raise Domain
+		val password = getOpt(cgi_field_string("password"), "")
+		val passwordRepeat = getOpt(cgi_field_string("repeatPassword"), "")
     in
-	if successPassword then 
-	    let
-		val successName = getUser(openIn "../webchat/users.txt", name) = ""
-		val outStream = openAppend ("../webchat/users.txt")
-		val date = Date.toString(Date.fromTimeUniv(Time.now()))
-	    in
-		if successName then (output (outStream, name ^ ">" ^ password ^ ">" ^ date ^ ">" ^ "0" ^ "\n"); closeOut(outStream); login(User(name,password,date,0)))
-		else 
-		     print ("User already exists")
-	    end
-	else
-	     print ("Passwords do not match")
+		if password = passwordRepeat then 
+			let
+				val name = getOpt(cgi_field_string("username"), "")
+				val inStream = openIn "../webchat/users.txt"
+				val successName = getUser(inStream, name) = ""
+				val outStream = (closeIn(inStream); openAppend ("../webchat/users.txt"))
+				val date = Date.toString(Date.fromTimeUniv(Time.now()))
+			in
+				if successName then (output(outStream, name ^ ">" ^ password ^ ">" ^ date ^ ">" ^ "0\n"); closeOut(outStream); login(User(name,password,date,0)))
+			else 
+				print ("User already exists")
+			end
+		else
+			 print ("Passwords do not match")
     end;
 
 fun saveMsgToFile (msg,chatName,userName) =
@@ -169,51 +164,57 @@ fun saveMsgToFile (msg,chatName,userName) =
 		(output (outStream, userName ^ "@" ^ Date.toString(Date.fromTimeUniv(Time.now())) ^ "@" ^ msg ^ "@"); closeOut (outStream))
 	end;
 		
-fun replaceUserInfo(x::y::z::v::xs, i, name, change) = if x = name then 
-		case i of 
-		  1 => change::y::z::v::xs (*should not be changed*)
-		| 2 => x::change::z::v::xs(*should not be changed*)
-		| 3 => x::y::change::v::xs (*should not be changed*)
-		| 4 => x::y::z::change::xs
-		| _ => raise Domain
-	else 
-		x::y::z::v::replaceUserInfo(xs, i, name, change)
-  | replaceUserInfo(_, _, _, _) = raise Domain
+
+fun changeUserField(name, stream, replacement, whichField) = let 
+	exception postCountUpdate of string
+	val thisLine = inputLine(stream)
+	infix 6 >^
+	fun x >^ y = x^ ">" ^y
+in
+	case String.tokens (fn y => #">" = y) thisLine of
+		x::y::z::v::[] => if x = name then
+				case whichField of 
+					4 => x >^ y >^ z >^ replacement ^ "\n" ^ input(stream)
+				  |	1 => replacement >^ y >^ z >^ v ^ "\n" ^ input(stream)
+				  | 2 => x >^ replacement >^ z >^ v ^ "\n" ^ input(stream)
+				  | 3 => x >^ y >^ replacement >^ v ^ "\n" ^ input(stream) 
+				  | _ => raise postCountUpdate "whichField must be between 1 and 4"
+			else
+				thisLine ^ changeUserField(name, stream, replacement, whichField)
+	  | [x] => raise postCountUpdate x
+	  | [] => raise postCountUpdate "[]"
+	  | _ => raise postCountUpdate "unknown error 2-3 elements"
+end	
 	
-	
-fun addToPostCount(User(name, pass, date, post)) =
+fun addToPostCount(User(name, _, _, post)) =
 	let
 		val userStream = openIn("../webchat/users.txt")
-		val usersStringBlown = explode(inputAll(userStream))
-		val newText = String.concatWith ">" (replaceUserInfo(map implode (splitList(explode(totalChat), [[]], #">")), 4, name, Int.toString(post+1)))
+		val newText = changeUserField(name, userStream, Int.toString(post + 1), 4)
 		val closeStream = closeIn(userStream)
 		val openUserStream = openOut("../webchat/users.txt")
 	in
 		(output(openUserStream, newText); closeOut(openUserStream))
 	end
-  | addToPostCount(EmptyUser) = raise Domain
 	
-fun postMessage(user) =
+fun postMessage(user as User(name, pw, date, postCount)) =
 	let
 		val message = getOpt(cgi_field_string("postTextField"), "")
-		val filteredMsg = filterString(message)
-		val smileysAddedMsg = insertSmiley(explode(filteredMsg))
-		val userName = getOpt(cgi_field_string("userName"), "")
+		val filteredMsg = insertSmiley(explode(filterString(message)))
 	in
-		(saveMsgToFile(smileysAddedMsg,"Main",userName); addToPostCount(user); generateChat("Main",user))
+		(saveMsgToFile(filteredMsg,"Main",name); addToPostCount(user); generateChat("Main",User(name, pw, date, postCount + 1)))
 	end;
 
 fun main() =
     let
-	val formType = getOpt(cgi_field_string("formType"), "")
-	val name = getOpt(cgi_field_string("username"), "")
-	val userList = getUser(openIn "../webchat/users.txt", name) 
-	val user = returnUser(userList)
+		val formType = getOpt(cgi_field_string("formType"), "")
+		val name = getOpt(cgi_field_string("username"), "")
+		val userList = getUser(openIn "../webchat/users.txt", name) 
+		val user = returnUser(userList)
     in
-	(print ("Content-type: text/html\n\n<!DOCTYPE html><html><head><meta charset=\"UTF-8\"><link rel=\"stylesheet\" type=\"text/css\" href=\"" ^ websiteURL ^ "styles/styles.css\" /></head><body>");
-	print "<div class=\"headerDiv\"></div>";
-	(if formType = "login" then login(user) else if formType = "signup" then signup() else if formType="postMessage" then postMessage(user) else if formType="reloadChat" then generateChat("Main",user) else raise Domain);
-	print "</body></html>")
+		(print ("Content-type: text/html\n\n<!DOCTYPE html><html><head><meta charset=\"UTF-8\"><link rel=\"stylesheet\" type=\"text/css\" href=\"" ^ websiteURL ^ "styles/styles.css\" /></head><body>");
+		print "<div class=\"headerDiv\"></div>";
+		(if formType = "login" then login(user) else if formType = "signup" then signup() else if formType="postMessage" then postMessage(user) else if formType="reloadChat" then generateChat("Main",user) else raise Domain);
+		print "</body></html>")
     end;
 
 val _ = main();
