@@ -6,13 +6,15 @@ val websiteURL = implode(List.filter (fn x => x <> #"\n") (explode(inputLine(cfg
 val cgiURL = implode(List.filter (fn x => x <> #"\n") (explode(inputLine(cfgStream))));
 val a = closeIn(cfgStream);
 
+exception Tjena
+
 (* REPRESENTATION CONVENTION: Represents a user of a chat forum
    User(name, password, date, postCount) - A user with name, password, a creation date and a post count
    EmtptyUser - An empty user
 	
  * REPRESENTATION INVARIANT: name is unique (no other user can have the same name), length of password ?, postCount >= 0
  *)
-datatype user = User of (string * string * string * int)
+datatype user = User of (string * string * string * int) | EmptyUser
 
 (* REPRESENTATION CONVENTION: Represents a message in a chat forum
    MSG(username, postdate, text) - A message written by a user with name username at date postdate with text as the content 
@@ -82,7 +84,7 @@ fun splitList ([], y, _) = y
 fun returnUser l =
     case (map implode(splitList(explode(l),[[]], #">"))) of
 	x::y::z::v::_ => User(x, y, z, valOf(Int.fromString(v)))
-      | _ => raise Domain
+      | _ => EmptyUser
 
 fun checkLogin (User(_,y,_,_), input) = y = input
 
@@ -127,7 +129,7 @@ fun login(user) =
     let
 		val name = getOpt(cgi_field_string("username"), "")
 		val password = getOpt(cgi_field_string("password"), "")
-		val loginSuccess = checkLogin(user, password)
+		val loginSuccess =  user <> EmptyUser andalso checkLogin(user, password)
     in
 		if(loginSuccess) then 
 			generateChat("Main",user)
@@ -137,7 +139,6 @@ fun login(user) =
 
 fun signup() =
     let
-		val x = raise Domain
 		val password = getOpt(cgi_field_string("password"), "")
 		val passwordRepeat = getOpt(cgi_field_string("repeatPassword"), "")
     in
