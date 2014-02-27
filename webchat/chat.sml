@@ -6,7 +6,7 @@ val websiteURL = implode(List.filter (fn x => x <> #"\n") (explode(inputLine(cfg
 val cgiURL = implode(List.filter (fn x => x <> #"\n") (explode(inputLine(cfgStream))));
 val a = closeIn(cfgStream);
 
-exception Tjena
+exception generalErrorMsg of string
 
 (* REPRESENTATION CONVENTION: Represents a user of a chat forum
    User(name, password, date, postCount) - A user with name, password, a creation date and a post count
@@ -87,6 +87,22 @@ fun returnUser l =
       | _ => EmptyUser
 
 fun checkLogin (User(_,y,_,_), input) = y = input
+  | checkLogin (EmptyUser, _) = raise generalErrorMsg "Error in function checkLogin"
+
+fun mainChatList(userName) = 
+	let
+		val inStream = openIn("../webchat/chats/chats.master")
+		fun mainChatList'(stream) = 
+			let
+				val endOfFile = endOfStream(stream)
+				val chatNameFromFile = inputLine(inStream)
+				val chatName::_ = String.fields (fn x => x = #"\n") chatNameFromFile
+			in
+				if endOfFile then "" else ("<form method=\"post\" action=\"" ^ cgiURL ^ "chat.cgi\"><input type=\"hidden\" name=\"chatName\" value=\"" ^ chatName ^ "\"><input type=\"hidden\" name=\"username\" value=\"" ^ userName ^ "\"><input type=\"hidden\" name=\"formType\" value=\"reloadChat\"><button type=\"submit\" value=\"" ^ chatName ^ "\">" ^ chatName ^ "</button></form><br />" ^ mainChatList'(stream))
+			end
+	in
+		mainChatList'(inStream)
+	end;
 
 fun readChat chatName = 
     let
@@ -109,21 +125,22 @@ fun readMSGS (Chat(name, [])) = ""
 
 fun generateChat(chat,User(userName,_,date,postCount)) = 
 	let
-		val messages = readMSGS(readChat("../webchat/chats/Main.txt"))
+		val messages = readMSGS(readChat("../webchat/chats/" ^ chat ^ ".txt"))
 		val currentMsgInput = getOpt(cgi_field_string("currentMsgInput"), "")
 	in
 		print ("<div class=\"chatMainDiv\"><div id=\"chatMessagesDiv\"><h3>"
 		^ chat ^ " chat</h3>" 
-		^ messages ^ " </div><div id=\"chatListDiv\">Chats<br /></div><br /><div class=\"yourProfileDiv\"><h3>Your profile</h3>Name: " 
+		^ messages ^ " </div><div id=\"chatListDiv\">Chats<br />" ^ mainChatList(userName) ^ "</div><br /><div class=\"yourProfileDiv\"><h3>Your profile</h3>Name: " 
 		^ userName ^ "<br />Posts: " ^ Int.toString(postCount) ^ "</div><br /><div class=\"writeMessageDiv\"><form name=\"postMessage\" method=\"post\" action=\""
 		^ cgiURL ^ "chat.cgi\"><input type=\"text\" name=\"postTextField\" id=\"postTextField\" class=\"postTextField\" value=\""
 		^ currentMsgInput ^ "\" onfocus=\"this.value = this.value;\"><input type=\"hidden\" name=\"formType\" value=\"postMessage\"><input type=\"hidden\" name=\"username\" value=\""
-		^ userName ^ "\"><button type=\"submit\" name=\"submit\" value=\"post\">Post</button></form></div></div><form name=\"reloadChat\" id=\"reloadChat\" method=\"post\" action=\""
+		^ userName ^ "\"><input type=\"hidden\" name=\"chatName\" value=\"" ^ chat ^ "\"><button type=\"submit\" name=\"submit\" value=\"post\">Post</button></form></div></div><form name=\"reloadChat\" id=\"reloadChat\" method=\"post\" action=\""
 		^ cgiURL ^ "chat.cgi\"><input type=\"hidden\" name=\"formType\" value=\"reloadChat\"><input type=\"hidden\" name=\"username\" value=\""
 		^ userName ^ "\"><input type=\"hidden\" name=\"currentMsgInput\" id=\"currentMsgInput\" value=\""
-		^ currentMsgInput ^ "\"></form><script src=\""
+		^ currentMsgInput ^ "\"><input type=\"hidden\" name=\"chatName\" value=\"" ^ chat ^ "\"></form><script src=\""
 		^ websiteURL ^ "js/scripts.js\"></script>")
 	end
+  | generateChat(_,EmptyUser) = raise generalErrorMsg "Error in function generateChat"
 
 fun login(user) =
     let
@@ -196,25 +213,28 @@ fun addToPostCount(User(name, _, _, post)) =
 	in
 		(output(openUserStream, newText); closeOut(openUserStream))
 	end
+  | addToPostCount(EmptyUser) = raise generalErrorMsg "Error in function addToPostCount"
 	
-fun postMessage(user as User(name, pw, date, postCount)) =
+fun postMessage(user as User(name, pw, date, postCount),chatName) =
 	let
 		val message = getOpt(cgi_field_string("postTextField"), "")
 		val filteredMsg = insertSmiley(explode(filterString(message)))
 	in
-		(saveMsgToFile(filteredMsg,"Main",name); addToPostCount(user); generateChat("Main",User(name, pw, date, postCount + 1)))
-	end;
+		(saveMsgToFile(filteredMsg,chatName,name); addToPostCount(user); generateChat(chatName,User(name, pw, date, postCount + 1)))
+	end
+  | postMessage(EmptyUser,_) = raise generalErrorMsg "Error in function postMessage"
 
 fun main() =
     let
 		val formType = getOpt(cgi_field_string("formType"), "")
 		val name = getOpt(cgi_field_string("username"), "")
+		val chatName = if getOpt(cgi_field_string("chatName"), "") = "" then "Main" else getOpt(cgi_field_string("chatName"), "")
 		val userList = getUser(openIn "../webchat/users.txt", name) 
 		val user = returnUser(userList)
     in
 		(print ("Content-type: text/html\n\n<!DOCTYPE html><html><head><meta charset=\"UTF-8\"><link rel=\"stylesheet\" type=\"text/css\" href=\"" ^ websiteURL ^ "styles/styles.css\" /></head><body>");
 		print "<div class=\"headerDiv\"></div>";
-		(if formType = "login" then login(user) else if formType = "signup" then signup() else if formType="postMessage" then postMessage(user) else if formType="reloadChat" then generateChat("Main",user) else raise Domain);
+		(if formType = "login" then login(user) else if formType = "signup" then signup() else if formType="postMessage" then postMessage(user,chatName) else if formType="reloadChat" then generateChat(chatName,user) else raise generalErrorMsg "Error in function Main");
 		print "</body></html>")
     end;
 
