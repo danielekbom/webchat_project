@@ -287,16 +287,17 @@ fun changeUserFieldInFile(name, streamLine, replacement, whichField) = let
  * VARIANT: lines in UserFileStream
  * SIDE EFFECTS: advances the current stream position
  *)		
-fun changeUserField(name, stream, replacement, whichField) = let
-	val condition = endOfStream(stream)
-	val thisLine = inputLine(stream)
-	val newField = changeUserFieldInFile(name, thisLine, replacement, whichField)
-in
-	if condition then
-		""
-	else 
-		if newField <> thisLine then newField ^ inputAll(stream) else newField ^ changeUserField(name, stream, replacement, whichField)
-end
+fun changeUserField(name, stream, replacement, whichField) =
+	let
+		val condition = endOfStream(stream)
+		val thisLine = inputLine(stream)
+		val newField = changeUserFieldInFile(name, thisLine, replacement, whichField)
+	in
+		if condition then
+			""
+		else 
+			if newField <> thisLine then newField ^ inputAll(stream) else newField ^ changeUserField(name, stream, replacement, whichField)
+	end
 	
 fun addToPostCount(User(name, _, _, post)) =
 	let
@@ -318,11 +319,30 @@ fun postMessage(user as User(name, pw, date, postCount),chatName) =
 	end
   | postMessage(EmptyUser,_) = raise generalErrorMsg "Error in function postMessage"
 
+fun chatExistsAux (chatName,stream) =
+	let
+		val condition = endOfStream(stream)
+		val thisLine = inputLine(stream)
+	in
+		if condition then
+			false
+		else if thisLine = chatName ^ "\n" then 
+			true 
+		else chatExistsAux (chatName,stream)
+	end;
+
+fun chatExists chatName = 
+	let
+		val chatStream = openIn("../webchat/chats/chats.master")
+	in
+		(closeIn(chatStream); chatExistsAux (chatName,chatStream))
+	end;
+
 fun createNewChat (chatName,user) =
 	let
 		val outStream = openAppend ("../webchat/chats/chats.master")
 	in
-		(output (outStream,(chatName ^ "\n")); closeOut (outStream); openOut("../webchat/chats/" ^ chatName ^ ".txt"); generateChat(chatName,user))
+		(if not(chatExists(chatName)) then (output (outStream,(chatName ^ "\n")); closeOut (outStream); openOut("../webchat/chats/" ^ chatName ^ ".txt"); generateChat(chatName,user)) else raise generalErrorMsg "Error: Chat already exists!")
 	end;
 	
 fun clearChat (chatName,user) =
