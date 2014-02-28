@@ -51,6 +51,8 @@ fun insertSmiley [] = ""
 
 fun filterChar #"<" = "&lt;"
   | filterChar #"&" = "&amp;"
+  | filterChar #"@" = "&#64;"
+  | filterChar #">" = "&#62;"
   | filterChar ch = implode([ch]) (*Char.toString(ch)*);
   
 fun filterString(sList) = foldr (fn (x,y) => filterChar(x) ^ y) "" (explode(sList))
@@ -195,14 +197,13 @@ fun login(user) =
 			print ("Wrong username or password :(")
     end;
 
-fun signup() =
+fun signup(name) =
     let
 		val password = getOpt(cgi_field_string("password"), "")
 		val passwordRepeat = getOpt(cgi_field_string("repeatPassword"), "")
     in
 		if password = passwordRepeat then 
 			let
-				val name = getOpt(cgi_field_string("username"), "")
 				val inStream = openIn "../webchat/users.txt"
 				val successName = getUser(inStream, name) = ""
 				val outStream = (closeIn(inStream); openAppend ("../webchat/users.txt"))
@@ -278,14 +279,14 @@ fun postMessage(user as User(name, pw, date, postCount),chatName) =
 fun main() =
     let
 		val formType = getOpt(cgi_field_string("formType"), "")
-		val name = getOpt(cgi_field_string("username"), "")
+		val name = filterString(getOpt(cgi_field_string("username"), ""))
 		val chatName = if getOpt(cgi_field_string("chatName"), "") = "" then "Main" else getOpt(cgi_field_string("chatName"), "")
 		val userList = getUser(openIn "../webchat/users.txt", name) 
 		val user = returnUser(userList)
     in
 		(print ("Content-type: text/html\n\n<!DOCTYPE html><html><head><meta charset=\"UTF-8\"><link rel=\"stylesheet\" type=\"text/css\" href=\"" ^ websiteURL ^ "styles/styles.css\" /></head><body>");
 		print "<div class=\"headerDiv\"></div>";
-		(if formType = "login" then login(user) else if formType = "signup" then signup() else if formType="postMessage" then postMessage(user,chatName) else if formType="reloadChat" then generateChat(chatName,user) else raise generalErrorMsg "Error in function Main");
+		(if formType = "login" then login(user) else if formType = "signup" then signup(name) else if formType="postMessage" then postMessage(user,chatName) else if formType="reloadChat" then generateChat(chatName,user) else raise generalErrorMsg "Error in function Main");
 		print "</body></html>")
     end;
 
