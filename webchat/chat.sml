@@ -12,7 +12,7 @@ exception generalErrorMsg of string
    User(name, password, date, postCount) - A user with name, password, a creation date and a post count
    EmtptyUser - An empty user
 	
- * REPRESENTATION INVARIANT: name is unique (no other user can have the same name), length of password ?, postCount >= 0
+ * REPRESENTATION INVARIANT: none
  *)
 datatype user = User of (string * string * string * int) | EmptyUser
 
@@ -63,9 +63,12 @@ fun getName [] = []
 (* getUser(stream, name) 
  * TYPE: instream * string -> string
  * PRE: none
- * POST: 
+ * POST: returns the first line in stream that begins with name, if no line begins with name then ""
  *
- * VARIANT: length of x
+ * SIDE-EFFECTS: advances the current stream position
+ *               closes stream if it is endofstream, freeing associated resources
+ *
+ * VARIANT: length of stream
  *)
 fun getUser(is, name) = 
     let
@@ -76,16 +79,23 @@ fun getUser(is, name) =
 	if(cond) then (closeIn(is); "") else if(linename = name) then line else getUser(is, name)
     end;
 
+(* splitList x, y, c
+ * TYPE: ''a list * ''a list list * ''a -> ''a list list
+ * PRE: none
+ * POST: 
+ *
+ * EXCEPTIONS: raises Domain if...
+ *)
 fun splitList ([], y, _) = y
   | splitList((x::[]), y::ys, char) = if(x = char) then rev(y)::ys else splitList([], (rev(x::y) :: ys), char)
   | splitList((x::xs), y::ys, char) = if(x = char) then rev(y)::splitList(xs, []::ys, char) else splitList(xs, ((x::y) :: ys), char)
   | splitList(_,_,_) = raise Domain;
 
 (* returnUser l 
- * TYPE: char list -> user
+ * TYPE: string -> user
  * PRE: none
- * POST: If l is on the format subList1::">"::subList2::">"subList3::">"::(subList4 able to be parsed as integer) + possible extra characters starting with ">" 
-		 then User with attributes string of sublist1, string of subList2, string of subList3, integer parsed from string of subList4
+ * POST: If l is on the format subString1::">"::subString2::">"subString3::">"::(subString4 able to be parsed as integer) + possible extra characters starting with ">" 
+		 then User with attributes subString1, subString2, subString3, integer parsed from subString4
          else EmptyUser
  *)
 fun returnUser l =
