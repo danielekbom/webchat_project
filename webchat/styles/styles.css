@@ -120,7 +120,7 @@ button{
 	text-align:left;
 	margin:0px;
 	padding-left:0px;
-	width:112px;
+	width:100px;
 }
 
 .createChatDiv{
@@ -153,7 +153,23 @@ button{
 	background:none;
 	cursor:pointer;
 	border:0px;
-	
+}
+
+.emptyChatForm{
+	padding:0px;
+	height:16px;
+	width:16px;
+	background-image:url(images/empty.gif);
+	float:left;
+	margin:0px;
+}
+
+.emptyChatForm button{
+	height:16px;
+	width:16px;
+	background:none;
+	cursor:pointer;
+	border:0px;
 }
 
 .newChatTextField{
