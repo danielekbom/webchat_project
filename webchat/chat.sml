@@ -295,7 +295,7 @@ in
 	if condition then
 		""
 	else 
-		if newField <> thisLine then newField ^ input(stream) else newField ^ changeUserField(name, stream, replacement, whichField)
+		if newField <> thisLine then newField ^ inputAll(stream) else newField ^ changeUserField(name, stream, replacement, whichField)
 end
 	
 fun addToPostCount(User(name, _, _, post)) =
