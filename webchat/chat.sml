@@ -129,7 +129,7 @@ fun mainChatList(userName) =
 				val chatNameFromFile = inputLine(inStream)
 				val chatName::_ = String.fields (fn x => x = #"\n") chatNameFromFile
 			in
-				if endOfFile then "" else (("<form method=\"post\" action=\"" ^ cgiURL ^ "chat.cgi\" class=\"chooseChatForm\"><input type=\"hidden\" name=\"chatName\" value=\"" ^ chatName ^ "\"><input type=\"hidden\" name=\"username\" value=\"" ^ userName ^ "\"><input type=\"hidden\" name=\"formType\" value=\"reloadChat\"><button type=\"submit\">" ^ chatName ^ "</button></form>") ^ (if chatName <> "Main" andalso userName = "admin" then ("<form method=\"post\" action=\"" ^ cgiURL ^ "chat.cgi\" class=\"deleteChatForm\"><input type=\"hidden\" name=\"chatName\" value=\"" ^ chatName ^ "\"><input type=\"hidden\" name=\"username\" value=\"" ^ userName ^ "\"><input type=\"hidden\" name=\"formType\" value=\"deleteChat\"><button type=\"submit\"></button></form><form method=\"post\" action=\"" ^ cgiURL ^ "chat.cgi\" class=\"emptyChatForm\"><input type=\"hidden\" name=\"chatName\" value=\"" ^ chatName ^ "\"><input type=\"hidden\" name=\"username\" value=\"" ^ userName ^ "\"><input type=\"hidden\" name=\"formType\" value=\"emptyChat\"><button type=\"submit\"></button></form>") else "") ^ mainChatList'(stream))
+				if endOfFile then "" else (("<form method=\"post\" action=\"" ^ cgiURL ^ "chat.cgi\" class=\"chooseChatForm\"><input type=\"hidden\" name=\"chatName\" value=\"" ^ chatName ^ "\"><input type=\"hidden\" name=\"username\" value=\"" ^ userName ^ "\"><input type=\"hidden\" name=\"formType\" value=\"reloadChat\"><button type=\"submit\">" ^ chatName ^ "</button></form>") ^ (if userName = "admin" then ("<form method=\"post\" action=\"" ^ cgiURL ^ "chat.cgi\" class=\"emptyChatForm\"><input type=\"hidden\" name=\"chatName\" value=\"" ^ chatName ^ "\"><input type=\"hidden\" name=\"username\" value=\"" ^ userName ^ "\"><input type=\"hidden\" name=\"formType\" value=\"emptyChat\"><button type=\"submit\"></button></form>") else "") ^ (if userName = "admin" andalso chatName <> "Main" then ("<form method=\"post\" action=\"" ^ cgiURL ^ "chat.cgi\" class=\"deleteChatForm\"><input type=\"hidden\" name=\"chatName\" value=\"" ^ chatName ^ "\"><input type=\"hidden\" name=\"username\" value=\"" ^ userName ^ "\"><input type=\"hidden\" name=\"formType\" value=\"deleteChat\"><button type=\"submit\"></button></form>") else "") ^ mainChatList'(stream))
 			end
 	in
 		mainChatList'(inStream)
@@ -324,6 +324,13 @@ fun createNewChat (chatName,user) =
 	in
 		(output (outStream,(chatName ^ "\n")); closeOut (outStream); openOut("../webchat/chats/" ^ chatName ^ ".txt"); generateChat(chatName,user))
 	end;
+	
+fun emptyChat (chatName,user) =
+	let
+		val openChatStream = openOut("../webchat/chats/" ^ chatName ^ ".txt")
+	in
+		(output(openChatStream,""); closeOut(openChatStream); generateChat(chatName,user))
+	end;
   
 fun main() =
     let
@@ -335,7 +342,7 @@ fun main() =
     in
 		(print ("Content-type: text/html\n\n<!DOCTYPE html><html><head><meta charset=\"UTF-8\"><link rel=\"stylesheet\" type=\"text/css\" href=\"" ^ websiteURL ^ "styles/styles.css\" /></head><body>");
 		print "<div class=\"headerDiv\"></div>";
-		(if formType = "login" then login(user) else if formType = "signup" then signup(name) else if formType="postMessage" then postMessage(user,chatName) else if formType="reloadChat" then generateChat(chatName,user) else if formType="createNewChat" then createNewChat(chatName,user) else raise generalErrorMsg "Error in function Main");
+		(if formType = "login" then login(user) else if formType = "signup" then signup(name) else if formType="postMessage" then postMessage(user,chatName) else if formType="reloadChat" then generateChat(chatName,user) else if formType="createNewChat" then createNewChat(chatName,user) else if formType="emptyChat" then emptyChat(chatName,user) else raise generalErrorMsg "Error in function Main");
 		print "</body></html>")
     end;
 
