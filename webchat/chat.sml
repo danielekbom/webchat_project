@@ -103,6 +103,8 @@ fun returnUser l =
 	x::y::z::v::_ => User(x, y, z, valOf(Int.fromString(v)))
       | _ => EmptyUser
 
+fun formatDate date = String.substring(date,4,7) ^ String.substring(date,size(date)-4,4)
+
 (* checkLogin (user, input)
  * TYPE: user * string -> bool
  * PRE: none
@@ -143,7 +145,7 @@ fun readChat chatName =
  * PRE: none
  * POST: the attributes from msg added together with proper html code
  *)	
-fun readMSG(MSG(x, y, z)) = (x ^ " " ^ y ^ ":<br /><i>" ^ z ^ "</i><br /><div class=\"chatPostLine\"></div>")
+fun readMSG(MSG(x, y, z)) = ("<b>" ^ x ^ "</b>" ^ " " ^ y ^ ":<br /><i>" ^ z ^ "</i><br /><div class=\"chatPostLine\"></div>")
 
 (* readMSGS chat
  * TYPE: chat -> string
@@ -160,11 +162,12 @@ fun generateChat(chat,User(userName,_,date,postCount)) =
 	let
 		val messages = readMSGS(readChat("../webchat/chats/" ^ chat ^ ".txt"))
 		val currentMsgInput = getOpt(cgi_field_string("currentMsgInput"), "")
+		val date = formatDate(date)
 	in
 		print ("<div class=\"chatMainDiv\"><div id=\"chatMessagesDiv\"><h3>"
 		^ chat ^ " chat</h3>" 
 		^ messages ^ " </div><div id=\"chatListDiv\">Chats<br />" ^ mainChatList(userName) ^ "</div><br /><div class=\"createChatDiv\">Create chat<br /></div><br /><div class=\"yourProfileDiv\"><h3>Your profile</h3>Name: " 
-		^ userName ^ "<br />Posts: " ^ Int.toString(postCount) ^ "</div><br /><div class=\"writeMessageDiv\"><form name=\"postMessage\" method=\"post\" action=\""
+		^ userName ^ "<br />Posts: " ^ Int.toString(postCount) ^ "<br />Signup: " ^ date ^ "</div><br /><div class=\"writeMessageDiv\"><form name=\"postMessage\" method=\"post\" action=\""
 		^ cgiURL ^ "chat.cgi\"><input type=\"text\" name=\"postTextField\" id=\"postTextField\" class=\"postTextField\" value=\""
 		^ currentMsgInput ^ "\" onfocus=\"this.value = this.value;\"><input type=\"hidden\" name=\"formType\" value=\"postMessage\"><input type=\"hidden\" name=\"username\" value=\""
 		^ userName ^ "\"><input type=\"hidden\" name=\"chatName\" value=\"" ^ chat ^ "\"><button type=\"submit\" name=\"submit\" value=\"post\">Post</button></form></div></div><form name=\"reloadChat\" id=\"reloadChat\" method=\"post\" action=\""
