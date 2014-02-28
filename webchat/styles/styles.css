@@ -132,6 +132,15 @@ button{
 	font-weight:bold;
 }
 
+.createChatForm{
+	text-align:center;
+}
+
+.newChatTextField{
+	margin-top:5px;
+	width:145px;
+}
+
 .yourProfileDiv{
 	background-color:white;
 	width:150px;
