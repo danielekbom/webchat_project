@@ -1,3 +1,8 @@
+(* 	Om man glömmer:
+	cd public_html/cgi-bin/
+	mosmlc -o chat.cgi ../webchat/chat.sml
+*)
+
 open Mosmlcgi;
 open TextIO;
 
