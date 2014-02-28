@@ -224,26 +224,36 @@ fun saveMsgToFile (msg,chatName,userName) =
 	end;
 		
 
-fun changeUserField(name, stream, replacement, whichField) = let 
-	exception postCountUpdate of string
+fun changeUserFieldInFile(name, streamLine, replacement, whichField) = let
+		exception postCountUpdate of string
+		infix 6 >^
+		fun x >^ y = x^ ">" ^y
+	in
+		case String.tokens (fn y => #">" = y) streamLine of
+			x::y::z::v::[] => if x = name then
+					case whichField of 
+						4 => x >^ y >^ z >^ replacement ^ "\n"
+					  |	1 => replacement >^ y >^ z >^ v ^ "\n"
+					  | 2 => x >^ replacement >^ z >^ v ^ "\n"
+					  | 3 => x >^ y >^ replacement >^ v ^ "\n"
+					  | _ => raise postCountUpdate "whichField must be between 1 and 4"
+				else
+					streamLine
+		  | [x] => raise postCountUpdate x
+		  | [] => raise postCountUpdate "[]"
+		  | _ => raise postCountUpdate "unknown error 2-3 elements"
+	end
+	
+fun changeUserField(name, stream, replacement, whichField) = let
+	val condition = endOfStream(stream)
 	val thisLine = inputLine(stream)
-	infix 6 >^
-	fun x >^ y = x^ ">" ^y
+	val newField = changeUserFieldInFile(name, thisLine, replacement, whichField)
 in
-	case String.tokens (fn y => #">" = y) thisLine of
-		x::y::z::v::[] => if x = name then
-				case whichField of 
-					4 => x >^ y >^ z >^ replacement ^ "\n" ^ input(stream)
-				  |	1 => replacement >^ y >^ z >^ v ^ "\n" ^ input(stream)
-				  | 2 => x >^ replacement >^ z >^ v ^ "\n" ^ input(stream)
-				  | 3 => x >^ y >^ replacement >^ v ^ "\n" ^ input(stream) 
-				  | _ => raise postCountUpdate "whichField must be between 1 and 4"
-			else
-				thisLine ^ changeUserField(name, stream, replacement, whichField)
-	  | [x] => raise postCountUpdate x
-	  | [] => raise postCountUpdate "[]"
-	  | _ => raise postCountUpdate "unknown error 2-3 elements"
-end	
+	if condition then
+		""
+	else 
+		if newField <> thisLine then newField ^ changeUserField(name, stream, replacement, whichField) else newField ^ input(stream)
+end
 	
 fun addToPostCount(User(name, _, _, post)) =
 	let
