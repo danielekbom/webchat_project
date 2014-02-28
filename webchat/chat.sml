@@ -129,7 +129,7 @@ fun mainChatList(userName) =
 				val chatNameFromFile = inputLine(inStream)
 				val chatName::_ = String.fields (fn x => x = #"\n") chatNameFromFile
 			in
-				if endOfFile then "" else (("<form method=\"post\" action=\"" ^ cgiURL ^ "chat.cgi\" class=\"chooseChatForm\"><input type=\"hidden\" name=\"chatName\" value=\"" ^ chatName ^ "\"><input type=\"hidden\" name=\"username\" value=\"" ^ userName ^ "\"><input type=\"hidden\" name=\"formType\" value=\"reloadChat\"><button type=\"submit\">" ^ chatName ^ "</button></form>") ^ (if chatName <> "Main" then ("<form method=\"post\" action=\"" ^ cgiURL ^ "chat.cgi\" class=\"deleteChatForm\"><input type=\"hidden\" name=\"chatName\" value=\"" ^ chatName ^ "\"><input type=\"hidden\" name=\"username\" value=\"" ^ userName ^ "\"><input type=\"hidden\" name=\"formType\" value=\"deleteChat\"><button type=\"submit\"></button></form>") else "") ^ mainChatList'(stream))
+				if endOfFile then "" else (("<form method=\"post\" action=\"" ^ cgiURL ^ "chat.cgi\" class=\"chooseChatForm\"><input type=\"hidden\" name=\"chatName\" value=\"" ^ chatName ^ "\"><input type=\"hidden\" name=\"username\" value=\"" ^ userName ^ "\"><input type=\"hidden\" name=\"formType\" value=\"reloadChat\"><button type=\"submit\">" ^ chatName ^ "</button></form>") ^ (if chatName <> "Main" andalso userName = "admin" then ("<form method=\"post\" action=\"" ^ cgiURL ^ "chat.cgi\" class=\"deleteChatForm\"><input type=\"hidden\" name=\"chatName\" value=\"" ^ chatName ^ "\"><input type=\"hidden\" name=\"username\" value=\"" ^ userName ^ "\"><input type=\"hidden\" name=\"formType\" value=\"deleteChat\"><button type=\"submit\"></button></form>") else "") ^ mainChatList'(stream))
 			end
 	in
 		mainChatList'(inStream)
