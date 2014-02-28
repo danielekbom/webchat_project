@@ -155,16 +155,16 @@ button{
 	border:0px;
 }
 
-.emptyChatForm{
+.clearChatForm{
 	padding:0px;
 	height:16px;
 	width:16px;
-	background-image:url(images/empty.gif);
+	background-image:url(images/clear.gif);
 	float:left;
 	margin:0px;
 }
 
-.emptyChatForm button{
+.clearChatForm button{
 	height:16px;
 	width:16px;
 	background:none;
