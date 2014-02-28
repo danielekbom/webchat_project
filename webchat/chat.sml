@@ -81,11 +81,23 @@ fun splitList ([], y, _) = y
   | splitList((x::xs), y::ys, char) = if(x = char) then rev(y)::splitList(xs, []::ys, char) else splitList(xs, ((x::y) :: ys), char)
   | splitList(_,_,_) = raise Domain;
 
+(* returnUser l 
+ * TYPE: char list -> user
+ * PRE: none
+ * POST: If l is on the format subList1::">"::subList2::">"subList3::">"::(subList4 able to be parsed as integer) + possible extra characters starting with ">" 
+		 then User with attributes string of sublist1, string of subList2, string of subList3, integer parsed from string of subList4
+         else EmptyUser
+ *)
 fun returnUser l =
     case (map implode(splitList(explode(l),[[]], #">"))) of
 	x::y::z::v::_ => User(x, y, z, valOf(Int.fromString(v)))
       | _ => EmptyUser
 
+(* checkLogin (user, input)
+ * TYPE: user * string -> bool
+ * PRE: none
+ * POST: true if user is on the from user(a, b, c, d) and b = input else false 
+ *)	  
 fun checkLogin (User(_,y,_,_), input) = y = input
   | checkLogin (EmptyUser, _) = raise generalErrorMsg "Error in function checkLogin"
 
