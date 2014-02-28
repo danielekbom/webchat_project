@@ -226,6 +226,19 @@ fun saveMsgToFile (msg,chatName,userName) =
 	end;
 		
 
+(* changeUserFieldInFile(userName, userFileLine, replacement, whichField)
+ * TYPE: string * string * string * int -> string
+ * PRE: none
+ * POST: If userFileLine is in the format subString1 ^ ">" ^ subString2 ^ ">" ^ subString3 ^ ">" ^ subString4 then
+			if userName = subString1 then
+				replacement as subString(whichField) in subString1 ^ ">" ^ subString2 ^ ">" ^ subString3 ^ ">" ^ subString4
+			else
+				userFileLine
+		else
+			raise exception
+ * EXCEPTIONS: if not 0 < whichField < 5 then raise postCountUpdate("whichField must be between 1 and 4")
+			   if userFileLine is not in the format of subString1 ^ ">" ^ subString2 ^ ">" ^ subString3 ^ ">" ^ subString4 then raise postCountUpdate
+ *)
 fun changeUserFieldInFile(name, streamLine, replacement, whichField) = let
 		exception postCountUpdate of string
 		infix 6 >^
@@ -234,10 +247,10 @@ fun changeUserFieldInFile(name, streamLine, replacement, whichField) = let
 		case String.tokens (fn y => #">" = y) streamLine of
 			x::y::z::v::[] => if x = name then
 					case whichField of 
-						4 => x >^ y >^ z >^ replacement ^ "\n"
-					  |	1 => replacement >^ y >^ z >^ v ^ "\n"
-					  | 2 => x >^ replacement >^ z >^ v ^ "\n"
-					  | 3 => x >^ y >^ replacement >^ v ^ "\n"
+						4 => x >^ y >^ z >^ replacement (*when whichField = 4 replacement should end on "\n"*)
+					  |	1 => replacement >^ y >^ z >^ v
+					  | 2 => x >^ replacement >^ z >^ v
+					  | 3 => x >^ y >^ replacement >^ v
 					  | _ => raise postCountUpdate "whichField must be between 1 and 4"
 				else
 					streamLine
@@ -245,7 +258,21 @@ fun changeUserFieldInFile(name, streamLine, replacement, whichField) = let
 		  | [] => raise postCountUpdate "[]"
 		  | _ => raise postCountUpdate "unknown error 2-3 elements"
 	end
-	
+
+(* changeUserField(userName, userFileStream, replacement, whichField)
+ * TYPE: string * TextIO.instream * string * int -> ()
+ * PRE: none
+ * POST: if userName = (a substring of a line in userFileStream starting from index 0 and ending at the index of the first ">" in the line) then
+			The contents of userFileStream as a string where the line matching the above condition named userFileLine equals
+			if userFileLine is in the format subString1 ^ ">" ^ subString2 ^ ">" ^ subString3 ^ ">" ^ subString4 then
+				replacement as subString[whichField] in subString1 ^ ">" ^ subString2 ^ ">" ^ subString3 ^ ">" ^ subString4
+			else postCountUpdate raised by changeUserFieldInFile
+		 else postCountUpdate raised by changeUserFieldInFile
+		
+			
+ * VARIANT: lines in UserFileStream
+ * SIDE EFFECTS: advances the current stream position
+ *)		
 fun changeUserField(name, stream, replacement, whichField) = let
 	val condition = endOfStream(stream)
 	val thisLine = inputLine(stream)
