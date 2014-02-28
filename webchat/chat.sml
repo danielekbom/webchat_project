@@ -82,7 +82,7 @@ fun getUser(is, name) =
 (* splitList x, y, c
  * TYPE: ''a list * ''a list list * ''a -> ''a list list
  * PRE: none
- * POST: 
+ * POST: y added with elements from x separated by c... 
  *
  * EXCEPTIONS: raises Domain if...
  *)
@@ -138,12 +138,23 @@ fun readChat chatName =
 	(closeIn(chatStream); Chat(chatName, readChat'(map implode(splitList(explode(totalChat), [[]], #"@")))))
     end;
 
+(* readMSG msg
+ * TYPE: message -> string
+ * PRE: none
+ * POST: the attributes from msg added together with proper html code
+ *)	
 fun readMSG(MSG(x, y, z)) = (x ^ " " ^ y ^ ":<br /><i>" ^ z ^ "</i><br /><div class=\"chatPostLine\"></div>")
 
+(* readMSGS chat
+ * TYPE: chat -> string
+ * PRE: none
+ * POST: the attributes from msg added together with proper html code
+ *
+ * EXCEPTIONS: raises Domain if...
+ *)	
 fun readMSGS (Chat(name, [])) = ""
   | readMSGS (Chat(name,x::xs)) = readMSG(x) ^ readMSGS (Chat(name,xs))
-  | readMSGS _ = raise Domain
-
+  | readMSGS _ = raise Domain (* Varför raise domain här? Ska vi inte pattern matcha EmptyChat på detta ställe?*)
 
 fun generateChat(chat,User(userName,_,date,postCount)) = 
 	let
