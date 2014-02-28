@@ -287,7 +287,7 @@ end
 fun addToPostCount(User(name, _, _, post)) =
 	let
 		val userStream = openIn("../webchat/users.txt")
-		val newText = changeUserField(name, userStream, Int.toString(post + 1), 4)
+		val newText = changeUserField(name, userStream, (Int.toString(post + 1) ^ "\n"), 4)
 		val closeStream = closeIn(userStream)
 		val openUserStream = openOut("../webchat/users.txt")
 	in
