@@ -173,7 +173,7 @@ fun generateChat(chat,User(userName,_,date,postCount)) =
 	in
 		print ("<div class=\"chatMainDiv\"><div id=\"chatMessagesDiv\"><h3>"
 		^ chat ^ " chat</h3>" 
-		^ messages ^ " </div><div id=\"chatListDiv\">Chats<br />" ^ mainChatList(userName) ^ "</div><br /><div class=\"createChatDiv\">Create chat<br /></div><br /><div class=\"yourProfileDiv\"><h3>Your profile</h3>Name: " 
+		^ messages ^ " </div><div id=\"chatListDiv\">Chats<br />" ^ mainChatList(userName) ^ "</div><br /><div class=\"createChatDiv\">Create chat<br /><form action=\"" ^ cgiURL ^ "chat.cgi\" method=\"post\" class=\"createChatForm\"><input type=\"text\" name=\"newChatName\"><br /><button type=\"submit\">Create</button></form></div><br /><div class=\"yourProfileDiv\"><h3>Your profile</h3>Name: " 
 		^ userName ^ "<br />Posts: " ^ Int.toString(postCount) ^ "<br />Signup: " ^ formatedDate ^ "</div><br /><div class=\"logoutDiv\"><form action=\"" ^ websiteURL ^ "\"><button type=\"submit\">Logout</button></form></div><div class=\"writeMessageDiv\"><form name=\"postMessage\" method=\"post\" action=\""
 		^ cgiURL ^ "chat.cgi\"><input type=\"text\" name=\"postTextField\" id=\"postTextField\" class=\"postTextField\" value=\""
 		^ currentMsgInput ^ "\" onfocus=\"this.value = this.value;\"><input type=\"hidden\" name=\"formType\" value=\"postMessage\"><input type=\"hidden\" name=\"username\" value=\""
