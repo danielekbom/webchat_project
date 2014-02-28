@@ -165,6 +165,14 @@ fun readMSGS (Chat(name, [])) = ""
   | readMSGS (Chat(name,x::xs)) = readMSG(x) ^ readMSGS (Chat(name,xs))
   | readMSGS _ = raise Domain (* Varför raise domain här? Ska vi inte pattern matcha EmptyChat på detta ställe?*)
 
+(* generateChat (chat, user)
+ * TYPE: string * user -> ()
+ * PRE: none
+ * POST: ()
+ *
+ * SIDE-EFFECTS: Prints html code including the data from the user and the name and messages from the file with name chat
+ * EXCEPTIONS: raises generalErrorMsg if user is EmptyUser
+ *)	
 fun generateChat(chat,User(userName,_,date,postCount)) = 
 	let
 		val messages = readMSGS(readChat("../webchat/chats/" ^ chat ^ ".txt"))
@@ -186,9 +194,15 @@ fun generateChat(chat,User(userName,_,date,postCount)) =
 	end
   | generateChat(_,EmptyUser) = raise generalErrorMsg "Error in function generateChat"
 
+(* login user
+ * TYPE: user -> ()
+ * PRE: none
+ * POST: ()
+ *
+ * SIDE-EFFECTS: Prints html code for the main chat if password from user is equal to the field password else prints a message declaring that username or password is wrong.
+ *)
 fun login(user) =
     let
-		val name = getOpt(cgi_field_string("username"), "")
 		val password = getOpt(cgi_field_string("password"), "")
 		val loginSuccess =  user <> EmptyUser andalso checkLogin(user, password)
     in
