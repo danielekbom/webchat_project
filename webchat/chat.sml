@@ -326,7 +326,7 @@ fun chatExistsAux (chatName,stream) =
 	in
 		if condition then
 			false
-		else if thisLine = chatName ^ "\n" then 
+		else if thisLine = (chatName ^ "\n") then 
 			true 
 		else chatExistsAux (chatName,stream)
 	end;
@@ -335,7 +335,7 @@ fun chatExists chatName =
 	let
 		val chatStream = openIn("../webchat/chats/chats.master")
 	in
-		(closeIn(chatStream); chatExistsAux (chatName,chatStream))
+		chatExistsAux (chatName,chatStream)
 	end;
 
 fun createNewChat (chatName,user) =
