@@ -235,8 +235,9 @@ fun signup(name) =
 fun saveMsgToFile (msg,chatName,userName) =
 	let
 		val outStream = openAppend ("../webchat/chats/" ^ chatName ^ ".txt")
+		val resizedMsg = if size msg > 1000 then (String.substring(msg,0,999) ^ "...") else msg
 	in
-		(output (outStream, userName ^ "@" ^ Date.toString(Date.fromTimeUniv(Time.now())) ^ "@" ^ msg ^ "@"); closeOut (outStream))
+		(output (outStream, userName ^ "@" ^ Date.toString(Date.fromTimeUniv(Time.now())) ^ "@" ^ resizedMsg ^ "@"); closeOut (outStream))
 	end;
 		
 
@@ -374,14 +375,19 @@ fun deleteChat (chatName,user) =
 	
 fun nameToLower name = String.map Char.toLower name
   
+fun returnUserName(User(name, _,_,_)) = name
+  | returnUserName(_) = ""
+   
 fun main() =
-    let
+	let
 		val formType = getOpt(cgi_field_string("formType"), "")
 		val name = filterString(getOpt(cgi_field_string("username"), ""))
 		val lowerName = nameToLower name
 		val chatName = if getOpt(cgi_field_string("chatName"), "") = "" then "Main" else getOpt(cgi_field_string("chatName"), "")
-		val userName::userList = getUser(openIn "../webchat/users.txt", name) 
-		val user = if lowerName = nameToLower userName then returnUser(userList) else EmptyUser
+		val userList = getUser(openIn "../webchat/users.txt", name)
+		val user = returnUser(userList)
+		val userName = returnUserName(user)
+		val user = if userName <> "" then if nameToLower(userName) = lowerName then user else raise generalErrorMsg "user in main function does not match" else user
     in
 		(print ("Content-type: text/html\n\n<!DOCTYPE html><html><head><meta charset=\"UTF-8\"><link rel=\"stylesheet\" type=\"text/css\" href=\"" ^ websiteURL ^ "styles/styles.css\" /></head><body>");
 		print "<div class=\"headerDiv\"></div>";
