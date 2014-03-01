@@ -369,7 +369,7 @@ fun deleteChat (chatName,user) =
 		val closeStream = closeIn(chatStream)
 		val openChatStream = openOut("../webchat/chats/chats.master")
 	in
-		(output(openChatStream,newText); closeOut(openChatStream); generateChat("Main",user))
+		(output(openChatStream,newText); closeOut(openChatStream); OS.FileSys.remove("../webchat/chats/" ^ chatName ^ ".txt"); generateChat("Main",user))
 	end;
   
 fun main() =
