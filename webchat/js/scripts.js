@@ -56,9 +56,19 @@ function loadXMLDoc()
 	xmlhttp.send();
 }
 
+function msgChanged(){
+	if (document.getElementById('postTextField').value != ""){
+		document.getElementById('postSubmit').disabled = false
+	}
+	else{
+		document.getElementById('postSubmit').disabled = true
+	}
+}
+
 window.onload = scrollChatWindow();
 window.onload = getChatMessages();
 window.onload = setTextFieldFocus();
+window.onload = msgChanged();
 window.setInterval(function(){
   loadXMLDoc();
 }, 5000);
