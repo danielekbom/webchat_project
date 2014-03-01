@@ -351,6 +351,26 @@ fun clearChat (chatName,user) =
 	in
 		(output(openChatStream,""); closeOut(openChatStream); generateChat(chatName,user))
 	end;
+
+fun deleteChatAux (chatName,stream) =
+	let
+		val condition = endOfStream(stream)
+		val thisLine = inputLine(stream)
+	in
+		if condition then 
+			""
+		else if thisLine = (chatName ^ "\n") then deleteChatAux(chatName,stream) else chatName ^ "\n" ^ deleteChatAux(chatName,stream) 
+	end;
+
+fun deleteChat (chatName,user) =
+	let
+		val chatStream = openIn("../webchat/chats/chats.master")
+		val newText = deleteChatAux(chatName,chatStream)
+		val closeStream = closeIn(chatStream)
+		val openChatStream = openOut("../webchat/chats/chats.master")
+	in
+		(output(openChatStream,newText); closeOut(openChatStream); generateChat("Main",user))
+	end;
   
 fun main() =
     let
@@ -362,7 +382,7 @@ fun main() =
     in
 		(print ("Content-type: text/html\n\n<!DOCTYPE html><html><head><meta charset=\"UTF-8\"><link rel=\"stylesheet\" type=\"text/css\" href=\"" ^ websiteURL ^ "styles/styles.css\" /></head><body>");
 		print "<div class=\"headerDiv\"></div>";
-		(if formType = "login" then login(user) else if formType = "signup" then signup(name) else if formType="postMessage" then postMessage(user,chatName) else if formType="reloadChat" then generateChat(chatName,user) else if formType="createNewChat" then createNewChat(chatName,user) else if formType="clearChat" then clearChat(chatName,user) else raise generalErrorMsg "Error in function Main");
+		(if formType = "login" then login(user) else if formType = "signup" then signup(name) else if formType="postMessage" then postMessage(user,chatName) else if formType="reloadChat" then generateChat(chatName,user) else if formType="createNewChat" then createNewChat(chatName,user) else if formType="clearChat" then clearChat(chatName,user) else if formType="deleteChat" then deleteChat(chatName,user) else raise generalErrorMsg "Error in function Main");
 		print "</body></html>")
     end;
 
