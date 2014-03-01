@@ -342,7 +342,7 @@ fun createNewChat (chatName,user) =
 	let
 		val outStream = openAppend ("../webchat/chats/chats.master")
 	in
-		(if not(chatExists(chatName)) then (output (outStream,(chatName ^ "\n")); closeOut (outStream); openOut("../webchat/chats/" ^ chatName ^ ".txt"); generateChat(chatName,user)) else raise generalErrorMsg "Error: Chat already exists!")
+		(if not(chatExists(chatName)) then (output (outStream,(chatName ^ "\n")); closeOut (outStream); openOut("../webchat/chats/" ^ chatName ^ ".txt"); generateChat(chatName,user)) else print("Chat already exists!"))
 	end;
 	
 fun clearChat (chatName,user) =
@@ -359,7 +359,7 @@ fun deleteChatAux (chatName,stream) =
 	in
 		if condition then 
 			""
-		else if thisLine = (chatName ^ "\n") then deleteChatAux(chatName,stream) else chatName ^ "\n" ^ deleteChatAux(chatName,stream) 
+		else if thisLine = (chatName ^ "\n") then deleteChatAux(chatName,stream) else thisLine ^ deleteChatAux(chatName,stream) 
 	end;
 
 fun deleteChat (chatName,user) =
