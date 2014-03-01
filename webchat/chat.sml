@@ -56,6 +56,8 @@ fun filterChar #"<" = "&lt;"
   | filterChar ch = implode([ch]) (*Char.toString(ch)*);
   
 fun filterString(sList) = foldr (fn (x,y) => filterChar(x) ^ y) "" (explode(sList))
+
+fun nameToLower name = String.map Char.toLower name
   
 (* getName x 
  * TYPE: char list -> char list
@@ -83,7 +85,7 @@ fun getUser(is, name) =
 	val line = inputLine(is);
 	val linename = implode(getName(explode(line)));
     in
-	if(cond) then (closeIn(is); "") else if(linename = name) then line else getUser(is, name)
+	if(cond) then (closeIn(is); "") else if(nameToLower(linename) = nameToLower(name)) then line else getUser(is, name)
     end;
 
 (* splitList x, y, c
@@ -387,7 +389,7 @@ fun main() =
 		val userList = getUser(openIn "../webchat/users.txt", name)
 		val user = returnUser(userList)
 		val userName = returnUserName(user)
-		val user = if userName <> "" then if nameToLower(userName) = lowerName then user else raise generalErrorMsg "user in main function does not match" else user
+		(*val user = if userName <> "" then if nameToLower(userName) = lowerName then user else raise generalErrorMsg "user in main function does not match" else user*)
     in
 		(print ("Content-type: text/html\n\n<!DOCTYPE html><html><head><meta charset=\"UTF-8\"><link rel=\"stylesheet\" type=\"text/css\" href=\"" ^ websiteURL ^ "styles/styles.css\" /></head><body>");
 		print "<div class=\"headerDiv\"></div>";
