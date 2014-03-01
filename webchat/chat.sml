@@ -57,6 +57,9 @@ fun filterChar #"<" = "&lt;"
   
 fun filterString(sList) = foldr (fn (x,y) => filterChar(x) ^ y) "" (explode(sList))
 
+fun alphaNumCheck [] = true
+  | alphaNumCheck (x::xs) = if (Char.isAlphaNum x) then alphaNumCheck xs else false
+
 fun nameToLower name = String.map Char.toLower name
   
 (* getName x 
@@ -225,10 +228,11 @@ fun signup(name) =
 				val successName = getUser(inStream, name) = ""
 				val outStream = (closeIn(inStream); openAppend ("../webchat/users.txt"))
 				val date = Date.toString(Date.fromTimeUniv(Time.now()))
+				val nameAlphaNumCheck = (alphaNumCheck(explode(name)) andalso alphaNumCheck(explode(password)))
 			in
-				if successName then (output(outStream, name ^ ">" ^ password ^ ">" ^ date ^ ">" ^ "0\n"); closeOut(outStream); login(User(name,password,date,0)))
+				if successName andalso nameAlphaNumCheck then (output(outStream, name ^ ">" ^ password ^ ">" ^ date ^ ">" ^ "0\n"); closeOut(outStream); login(User(name,password,date,0)))
 			else 
-				print ("User already exists")
+				if not(nameAlphaNumCheck) then print("Username/password cantains illegal characters,<br />please use alpha-numeric characters only.") else print ("User already exists")
 			end
 		else
 			 print ("Passwords do not match")
