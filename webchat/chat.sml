@@ -41,6 +41,7 @@ fun getSmiley (#"P") = "<img class=\"smiley\" src=\"" ^ websiteURL ^ "styles/ima
   | getSmiley (#")") = "<img class=\"smiley\" src=\"" ^ websiteURL ^ "styles/images/smileys/original.jpg\" />"
   | getSmiley (#"(") = "<img class=\"smiley\" src=\"" ^ websiteURL ^ "styles/images/smileys/sad.jpg\" />"
   | getSmiley (#"O") = "<img class=\"smiley\" src=\"" ^ websiteURL ^ "styles/images/smileys/suprised.jpg\" />"
+  | getSmiley (#"3") = "<img class=\"smiley\" src=\"" ^ websiteURL ^ "styles/images/smileys/heart.jpg\" />"
   | getSmiley (x) = ":" ^ implode([x]) (*Char.toString(x)*)
  
 fun insertSmiley [] = ""
