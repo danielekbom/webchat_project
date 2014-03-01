@@ -371,14 +371,17 @@ fun deleteChat (chatName,user) =
 	in
 		(output(openChatStream,newText); closeOut(openChatStream); OS.FileSys.remove("../webchat/chats/" ^ chatName ^ ".txt"); generateChat("Main",user))
 	end;
+	
+fun nameToLower name = String.map Char.toLower name
   
 fun main() =
     let
 		val formType = getOpt(cgi_field_string("formType"), "")
 		val name = filterString(getOpt(cgi_field_string("username"), ""))
+		val lowerName = nameToLower name
 		val chatName = if getOpt(cgi_field_string("chatName"), "") = "" then "Main" else getOpt(cgi_field_string("chatName"), "")
-		val userList = getUser(openIn "../webchat/users.txt", name) 
-		val user = returnUser(userList)
+		val userName::userList = getUser(openIn "../webchat/users.txt", name) 
+		val user = if lowerName = nameToLower userName then returnUser(userList) else EmptyUser
     in
 		(print ("Content-type: text/html\n\n<!DOCTYPE html><html><head><meta charset=\"UTF-8\"><link rel=\"stylesheet\" type=\"text/css\" href=\"" ^ websiteURL ^ "styles/styles.css\" /></head><body>");
 		print "<div class=\"headerDiv\"></div>";
