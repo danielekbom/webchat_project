@@ -318,7 +318,7 @@ fun postMessage(user as User(name, pw, date, postCount),chatName) =
 		val message = getOpt(cgi_field_string("postTextField"), "")
 		val filteredMsg = insertSmiley(explode(filterString(message)))
 	in
-		(saveMsgToFile(filteredMsg,chatName,name); addToPostCount(user); generateChat(chatName,User(name, pw, date, postCount + 1)))
+		(if filteredMsg <> "" then (saveMsgToFile(filteredMsg,chatName,name); addToPostCount(user); generateChat(chatName,User(name, pw, date, postCount + 1))) else generateChat(chatName,user))
 	end
   | postMessage(EmptyUser,_) = raise generalErrorMsg "Error in function postMessage"
 
