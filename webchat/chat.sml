@@ -348,8 +348,12 @@ fun chatExists chatName =
 fun createNewChat (chatName,user) =
 	let
 		val outStream = openAppend ("../webchat/chats/chats.master")
+		val chatAlphaNumCheck = alphaNumCheck(explode(chatName))
 	in
-		(if not(chatExists(chatName)) then (output (outStream,(chatName ^ "\n")); closeOut (outStream); openOut("../webchat/chats/" ^ chatName ^ ".txt"); generateChat(chatName,user)) else print("Chat already exists!"))
+		if chatAlphaNumCheck then
+			(if not(chatExists(chatName)) then (output (outStream,(chatName ^ "\n")); closeOut (outStream); openOut("../webchat/chats/" ^ chatName ^ ".txt"); generateChat(chatName,user)) else print("Chat already exists!"))
+		else
+			(closeOut (outStream); print("Chatname cantains illegal characters,<br />please use alpha-numeric characters only."))
 	end;
 	
 fun clearChat (chatName,user) =
