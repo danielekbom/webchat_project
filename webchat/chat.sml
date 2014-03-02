@@ -1,10 +1,11 @@
 (* 	Om man glömmer:
-	cd public_html/cgi-bin/
-	mosmlc -o chat.cgi ../webchat/chat.sml
+	cd public_html/webchat/
+	mosmlc rsa.sml chat.sml -o ../cgi-bin/chat.cgi
 *)
 
 open Mosmlcgi;
 open TextIO;
+open rsa;
 
 val cfgStream = openIn("../webchat/url.cfg");
 val websiteURL = implode(List.filter (fn x => x <> #"\n") (explode(inputLine(cfgStream))));
@@ -133,9 +134,10 @@ fun mainChatList(userName) =
 			let
 				val endOfFile = endOfStream(stream)
 				val chatNameFromFile = inputLine(inStream)
-				val chatName::_ = String.fields (fn x => x = #"\n") chatNameFromFile
 			in
-				if endOfFile then "" else (("<form method=\"post\" action=\"" ^ cgiURL ^ "chat.cgi\" class=\"chooseChatForm\"><input type=\"hidden\" name=\"chatName\" value=\"" ^ chatName ^ "\"><input type=\"hidden\" name=\"username\" value=\"" ^ userName ^ "\"><input type=\"hidden\" name=\"formType\" value=\"reloadChat\"><button type=\"submit\">" ^ chatName ^ "</button></form>") ^ (if userName = "admin" then ("<form method=\"post\" action=\"" ^ cgiURL ^ "chat.cgi\" class=\"clearChatForm\"><input type=\"hidden\" name=\"chatName\" value=\"" ^ chatName ^ "\"><input type=\"hidden\" name=\"username\" value=\"" ^ userName ^ "\"><input type=\"hidden\" name=\"formType\" value=\"clearChat\"><button type=\"submit\"></button></form>") else "") ^ (if userName = "admin" andalso chatName <> "Main" then ("<form method=\"post\" action=\"" ^ cgiURL ^ "chat.cgi\" class=\"deleteChatForm\"><input type=\"hidden\" name=\"chatName\" value=\"" ^ chatName ^ "\"><input type=\"hidden\" name=\"username\" value=\"" ^ userName ^ "\"><input type=\"hidden\" name=\"formType\" value=\"deleteChat\"><button type=\"submit\"></button></form>") else "") ^ mainChatList'(stream))
+				if endOfFile then "" else case (String.fields (fn x => x = #"\n") chatNameFromFile) of
+					chatName::_ => (("<form method=\"post\" action=\"" ^ cgiURL ^ "chat.cgi\" class=\"chooseChatForm\"><input type=\"hidden\" name=\"chatName\" value=\"" ^ chatName ^ "\"><input type=\"hidden\" name=\"username\" value=\"" ^ userName ^ "\"><input type=\"hidden\" name=\"formType\" value=\"reloadChat\"><button type=\"submit\">" ^ chatName ^ "</button></form>") ^ (if userName = "admin" then ("<form method=\"post\" action=\"" ^ cgiURL ^ "chat.cgi\" class=\"clearChatForm\"><input type=\"hidden\" name=\"chatName\" value=\"" ^ chatName ^ "\"><input type=\"hidden\" name=\"username\" value=\"" ^ userName ^ "\"><input type=\"hidden\" name=\"formType\" value=\"clearChat\"><button type=\"submit\"></button></form>") else "") ^ (if userName = "admin" andalso chatName <> "Main" then ("<form method=\"post\" action=\"" ^ cgiURL ^ "chat.cgi\" class=\"deleteChatForm\"><input type=\"hidden\" name=\"chatName\" value=\"" ^ chatName ^ "\"><input type=\"hidden\" name=\"username\" value=\"" ^ userName ^ "\"><input type=\"hidden\" name=\"formType\" value=\"deleteChat\"><button type=\"submit\"></button></form>") else "") ^ mainChatList'(stream))
+				  | _ => raise generalErrorMsg "function mainChatList Error"
 			end
 	in
 		mainChatList'(inStream)
@@ -209,7 +211,7 @@ fun generateChat(chat,User(userName,_,date,postCount)) =
  *)
 fun login(user) =
     let
-		val password = getOpt(cgi_field_string("password"), "")
+		val password = encrypt(getOpt(cgi_field_string("password"), ""))
 		val loginSuccess =  user <> EmptyUser andalso checkLogin(user, password)
     in
 		if(loginSuccess) then 
@@ -225,6 +227,7 @@ fun signup(name) =
     in
 		if password = passwordRepeat then 
 			let
+				val password = encrypt(password)
 				val inStream = openIn "../webchat/users.txt"
 				val successName = getUser(inStream, name) = ""
 				val outStream = (closeIn(inStream); openAppend ("../webchat/users.txt"))
@@ -397,8 +400,6 @@ fun main() =
 		val chatName = if getOpt(cgi_field_string("chatName"), "") = "" then "Main" else getOpt(cgi_field_string("chatName"), "")
 		val userList = getUser(openIn "../webchat/users.txt", name)
 		val user = returnUser(userList)
-		val userName = returnUserName(user)
-		(*val user = if userName <> "" then if nameToLower(userName) = lowerName then user else raise generalErrorMsg "user in main function does not match" else user*)
     in
 		(print ("Content-type: text/html\n\n<!DOCTYPE html><html><head><meta charset=\"UTF-8\"><link rel=\"stylesheet\" type=\"text/css\" href=\"" ^ websiteURL ^ "styles/styles.css\" /></head><body>");
 		print "<div class=\"headerDiv\"></div>";

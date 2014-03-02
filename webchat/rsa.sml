@@ -1,5 +1,3 @@
-load("IntInf");
-
 fun findE(x, n) = if IntInf.eq(IntInf.mod(x, n), IntInf.fromInt(0)) then findE(x, IntInf.+(n, IntInf.fromInt(1))) else n
 
 fun convertPassword pass = 
@@ -23,5 +21,5 @@ fun encrypt input =
 
 	val final = valOf(IntInf.fromString(convertPassword(input)))
     in
-		IntInf.mod(IntInf.pow(final, e), n)
+		IntInf.toString(IntInf.mod(IntInf.pow(final, e), n))
     end
