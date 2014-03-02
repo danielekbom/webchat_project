@@ -60,7 +60,7 @@ fun filterChar #"<" = "&lt;"
 fun filterString(sList) = foldr (fn (x,y) => filterChar(x) ^ y) "" (explode(sList))
 
 fun alphaNumCheck [] = true
-  | alphaNumCheck (x::xs) = if (Char.isAlphaNum x) orelse x = #" " then alphaNumCheck xs else false
+  | alphaNumCheck (x::xs) = if (Char.isAlphaNum x) then alphaNumCheck xs else false
   
 fun stringSizeCheck s = if size s <= 10 andalso size s >= 3 then true else false
 
