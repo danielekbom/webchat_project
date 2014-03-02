@@ -357,34 +357,56 @@ fun postMessage(user as User(name, pw, date, postCount),chatName) =
 	end
   | postMessage(EmptyUser,_) = raise generalErrorMsg "Error in function postMessage"
 
-fun chatExistsAux (chatName,stream) =
+(* chatExists(chatName, stream)
+ * TYPE: string * instream -> bool
+ * PRE: none
+ * POST: if chatName ^ "\n" is a line in the stream then true
+		 else false
+ * SIDE EFFECTS: Advances the stream
+				 Closes stream
+ *)
+fun chatExists (chatName,stream) =
 	let
 		val condition = endOfStream(stream)
 		val thisLine = inputLine(stream)
 	in
 		if condition then
-			false
+			(closeIn(stream); false)
 		else if thisLine = (chatName ^ "\n") then 
-			true 
-		else chatExistsAux (chatName,stream)
+			(closeIn(stream); true )
+		else chatExists (chatName,stream)
 	end;
 
-fun chatExists chatName = 
-	let
-		val chatStream = openIn("../webchat/chats/chats.master")
-	in
-		chatExistsAux (chatName,chatStream)
-	end;
 
+(* createNewChat(chatName, user)
+ * TYPE: string * User -> ()
+ * PRE: none
+ * POST: ()
+ * SIDE EFFECTS: Opens an outstream to the end of "../webchat/chats/chats.master"
+ 
+				 if chatName contains only alphanumeric chars then
+					Opens an instream to "../webchat/chats/chats.master"
+					if chatName ^ "\n" is a line in the previously opened instream then
+						Outputs chatName ^ "\n" to the previously created outstream
+						Closes the previously created outstream
+						Opens an outstream to "../webchat/chats/ ^ chatName ^ ".txt"
+						
+						generateChat(chatName, user)
+					else
+						prints "Chat already exists!"
+				 else
+					 Closes the previously opened outstream
+					 prints "Chatname cantains illegal characters,<br />please use alpha-numeric characters only."
+ *) 
 fun createNewChat (chatName,user) =
 	let
 		val outStream = openAppend ("../webchat/chats/chats.master")
 		val chatAlphaNumCheck = alphaNumCheck(explode(chatName))
 	in
 		if chatAlphaNumCheck then
-			(if not(chatExists(chatName)) then (output (outStream,(chatName ^ "\n")); closeOut (outStream); openOut("../webchat/chats/" ^ chatName ^ ".txt"); generateChat(chatName,user)) else print("Chat already exists!"))
+			(if not(chatExists(chatName, openIn("../webchat/chats/chats.master"))) then (output (outStream,(chatName ^ "\n")); closeOut (outStream); openOut("../webchat/chats/" ^ chatName ^ ".txt"); generateChat(chatName,user)) else print("Chat already exists!"))
 		else
-			(closeOut (outStream); print("Chatname cantains illegal characters,<br />please use alpha-numeric characters only."))
+			(closeOut(outStream); print("Chatname cantains illegal characters,<br />please use alpha-numeric characters only."))
 	end;
 
 (* clearChat(chatName, user)
@@ -425,12 +447,12 @@ fun deleteChatAux (chatName,stream) =
  * TYPE: string * User -> ()
  * PRE: a file named chatName ^ .txt exists in ../webchat/chats
  * POST: ()
- * SIDE EFFECTS: Opens an instream to ../webchat/chats/chats.master
+ * SIDE EFFECTS: Opens an instream to "../webchat/chats/chats.master"
 				 Closes the previously opened instream
-				 Opens an outstream from ../webchat/chats/chats.master
-				 Outputs the contents of ../webchat/chats/chats.master without chatName
+				 Opens an outstream from "../webchat/chats/chats.master"
+				 Outputs the contents of "../webchat/chats/chats.master" without chatName
 				 Closes the previously opened outStream
-				 Removes the file ../webchat/chats/ ^ chatName ^ .txt
+				 Removes the file "../webchat/chats/" ^ chatName ^ ".txt"
 				 
 				 generateChat("Main", user)
  *)
