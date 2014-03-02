@@ -61,6 +61,8 @@ fun filterString(sList) = foldr (fn (x,y) => filterChar(x) ^ y) "" (explode(sLis
 
 fun alphaNumCheck [] = true
   | alphaNumCheck (x::xs) = if (Char.isAlphaNum x) then alphaNumCheck xs else false
+  
+fun stringSizeCheck s = if size s <= 10 andalso size s >= 3 then true else false
 
 fun nameToLower name = String.map Char.toLower name
   
@@ -224,6 +226,7 @@ fun signup(name) =
     let
 		val password = getOpt(cgi_field_string("password"), "")
 		val passwordRepeat = getOpt(cgi_field_string("repeatPassword"), "")
+		val stringSizeChecked = stringSizeCheck(password) andalso stringSizeCheck(name)
     in
 		if password = passwordRepeat then 
 			let
@@ -234,9 +237,9 @@ fun signup(name) =
 				val date = Date.toString(Date.fromTimeUniv(Time.now()))
 				val nameAlphaNumCheck = (alphaNumCheck(explode(name)) andalso alphaNumCheck(explode(password)))
 			in
-				if successName andalso nameAlphaNumCheck then (output(outStream, name ^ ">" ^ password ^ ">" ^ date ^ ">" ^ "0\n"); closeOut(outStream); login(User(name,password,date,0)))
+				if successName andalso nameAlphaNumCheck andalso stringSizeChecked then (output(outStream, name ^ ">" ^ password ^ ">" ^ date ^ ">" ^ "0\n"); closeOut(outStream); login(User(name,password,date,0)))
 			else 
-				if not(nameAlphaNumCheck) then print("Username/password cantains illegal characters,<br />please use alpha-numeric characters only.") else print ("User already exists")
+				if not(nameAlphaNumCheck) then print("Username/password cantains illegal characters,<br />please use alpha-numeric characters only.") else if not(stringSizeChecked) then print("Username/password must contain between 3 and 10 characters.") else print ("User already exists")
 			end
 		else
 			 print ("Passwords do not match")
