@@ -386,7 +386,17 @@ fun createNewChat (chatName,user) =
 		else
 			(closeOut (outStream); print("Chatname cantains illegal characters,<br />please use alpha-numeric characters only."))
 	end;
-	
+
+(* clearChat(chatName, user)
+ * TYPE: string * User -> ()
+ * PRE: none
+ * POST: ()
+ * SIDE EFFECTS: Opens an outstream to "../webchat/chats/" ^ chatName ^ ".txt"
+				 Outputs "" to the previously opened outstream
+				 Closes the previously opened outstream
+				 
+				 generateChat(chatName, user)
+ *)
 fun clearChat (chatName,user) =
 	let
 		val openChatStream = openOut("../webchat/chats/" ^ chatName ^ ".txt")
@@ -394,6 +404,13 @@ fun clearChat (chatName,user) =
 		(output(openChatStream,""); closeOut(openChatStream); generateChat(chatName,user))
 	end;
 
+(* deleteChatAux(chatName, stream)
+ * TYPE: string * instream -> string
+ * PRE: none
+ * POST: The contents of stream with the line equal to chatName ^ "\n" removed
+ * SIDE EFFECTS: Advances stream
+ * VARIANT: lines in stream
+ *)
 fun deleteChatAux (chatName,stream) =
 	let
 		val condition = endOfStream(stream)
@@ -404,6 +421,19 @@ fun deleteChatAux (chatName,stream) =
 		else if thisLine = (chatName ^ "\n") then deleteChatAux(chatName,stream) else thisLine ^ deleteChatAux(chatName,stream) 
 	end;
 
+(* deleteChat(chatName, user)
+ * TYPE: string * User -> ()
+ * PRE: a file named chatName ^ .txt exists in ../webchat/chats
+ * POST: ()
+ * SIDE EFFECTS: Opens an instream to ../webchat/chats/chats.master
+				 Closes the previously opened instream
+				 Opens an outstream from ../webchat/chats/chats.master
+				 Outputs the contents of ../webchat/chats/chats.master without chatName
+				 Closes the previously opened outStream
+				 Removes the file ../webchat/chats/ ^ chatName ^ .txt
+				 
+				 generateChat("Main", user)
+ *)
 fun deleteChat (chatName,user) =
 	let
 		val chatStream = openIn("../webchat/chats/chats.master")
@@ -413,11 +443,13 @@ fun deleteChat (chatName,user) =
 	in
 		(output(openChatStream,newText); closeOut(openChatStream); OS.FileSys.remove("../webchat/chats/" ^ chatName ^ ".txt"); generateChat("Main",user))
 	end;
-	
+
+(* nameToLower(name)
+ * TYPE: string -> string
+ * PRE: none
+ * POST: name where all alphabetical chars are uppercase.
+ *)	
 fun nameToLower name = String.map Char.toLower name
-  
-fun returnUserName(User(name, _,_,_)) = name
-  | returnUserName(_) = ""
    
 fun main() =
 	let

@@ -1,12 +1,25 @@
-fun findE(x, n) = if IntInf.eq(IntInf.mod(x, n), IntInf.fromInt(0)) then findE(x, IntInf.+(n, IntInf.fromInt(1))) else n
+(* findE(x, n)
+ * TYPE: int/1 * int/1 -> int/1
+ * PRE: n > 0
+ * POST: the first coprime of x starting from n
+ * VARIANT: ????
+ *)		
+fun findE(x, n) = if IntInf.eq(IntInf.mod(x, n), IntInf.fromInt(0)) then
+						findE(x, IntInf.+(n, IntInf.fromInt(1))) 
+					else n
 
-fun convertPassword pass = 
-    let	
-		fun convert pwList = foldr (fn (x,y) => Int.toString(ord(x)) ^ y) "" (explode(pwList))
-    in 
-		convert(pass)
-    end
+(* convertPassword(pass)
+ * TYPE: string -> string
+ * PRE: n > 0
+ * POST: pass with every char replaced by their ascii value
+ *)		
+fun convertPassword pass = foldr (fn (x,y) => Int.toString(ord(x)) ^ y) "" (explode(pass))
 
+(* encrypt(input)
+ * TYPE: string -> string
+ * PRE: size input > 0
+ * POST: ?????????????????????????????????????????????????????????????????????????????????????????
+ *)	
 fun encrypt input = 
     let 
 	val p = valOf(IntInf.fromString("5371393606024775251256550436773565977406724269152942136415762782810562554131599074907426010737503501"))
