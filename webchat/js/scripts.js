@@ -1,6 +1,6 @@
 // JavaScript Document
 
-var websiteURL = "http://user.it.uu.se/~daek3938/webchat/";
+var websiteURL = "http://user.it.uu.se/~osah7839/webchat/";
 var currentChatMessages;
 
 function scrollChatWindow(){

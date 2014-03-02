@@ -56,14 +56,31 @@ fun filterChar #"<" = "&lt;"
   | filterChar #"@" = "&#64;"
   | filterChar #">" = "&#62;"
   | filterChar ch = implode([ch]) (*Char.toString(ch)*);
-  
+ 
 fun filterString(sList) = foldr (fn (x,y) => filterChar(x) ^ y) "" (explode(sList))
 
+(* alphaNumCheck x 
+ * TYPE: char list -> bool
+ * PRE: none
+ * POST: true if every char in x is a letter or digit else false
+ *
+ * VARIANT: length of x
+ *)
 fun alphaNumCheck [] = true
   | alphaNumCheck (x::xs) = if (Char.isAlphaNum x) then alphaNumCheck xs else false
-  
+ 
+(* stringSizeCheck s 
+ * TYPE: string -> bool
+ * PRE: none
+ * POST: true if the size of s is greater or equal than 3 and less or equal than 10 else false
+ *)
 fun stringSizeCheck s = if size s <= 10 andalso size s >= 3 then true else false
 
+(* nameToLower name 
+ * TYPE: string -> string
+ * PRE: none
+ * POST: All of the characters from name but with every alphabetic letter as lowercase
+ *)
 fun nameToLower name = String.map Char.toLower name
   
 (* getName x 
