@@ -139,7 +139,7 @@ fun returnUser l =
 (* formatDate date
  * TYPE: string -> string
  * PRE: none
- * POST: the characters from date in the index intervals 4-7 + (length - 4) - length
+ * POST: the characters from date in the index intervals 4 - 10 + (length - 4) - length
  *
  * EXAMPLE: formatDate "Fri Mar 21 14:10:45 2014" = "Mar 21 2014"
  *)
