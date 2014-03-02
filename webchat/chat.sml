@@ -136,12 +136,19 @@ fun returnUser l =
 	x::y::z::v::_ => User(x, y, z, valOf(Int.fromString(v)))
       | _ => EmptyUser
 
+(* formatDate date
+ * TYPE: string -> string
+ * PRE: none
+ * POST: the characters from date in the index intervals 4-7 + (length - 4) - length
+ *
+ * EXAMPLE: formatDate "Fri Mar 21 14:10:45 2014" = "Mar 21 2014"
+ *)
 fun formatDate date = String.substring(date,4,7) ^ String.substring(date,size(date)-4,4)
 
 (* checkLogin (user, input)
  * TYPE: user * string -> bool
  * PRE: none
- * POST: true if user is on the from user(a, b, c, d) and b = input else false 
+ * POST: true if user is on the from user(a, b, c, d) and b = input else false
  *)	  
 fun checkLogin (User(_,y,_,_), input) = y = input
   | checkLogin (EmptyUser, _) = raise generalErrorMsg "Error in function checkLogin"
