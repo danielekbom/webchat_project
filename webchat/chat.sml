@@ -51,12 +51,26 @@ fun insertSmiley [] = ""
   | insertSmiley ((#":")::y::tail) = getSmiley(y) ^ insertSmiley(tail)
   | insertSmiley (x::tail) = implode([x]) ^ insertSmiley(tail)
 
+(* filterChar char 
+ * TYPE: char -> string
+ * PRE: none
+ * POST: if char is "<" then "&lt;" 
+		 else if char = "&" then "&amp;" 
+		 else if char = "@" then "&#64;" 
+		 else if char = ">" then "&#62;"
+		 else the element of char as a string
+ *)
 fun filterChar #"<" = "&lt;"
   | filterChar #"&" = "&amp;"
   | filterChar #"@" = "&#64;"
   | filterChar #">" = "&#62;"
   | filterChar ch = implode([ch]) (*Char.toString(ch)*);
  
+(* filterString sList 
+ * TYPE: string -> string
+ * PRE: none
+ * POST: sList with the characters "<", "&", "@" and ">" replaced with the strings "&lt;", "&amp;", "&#64;", "&#62;" respectively
+ *)
 fun filterString(sList) = foldr (fn (x,y) => filterChar(x) ^ y) "" (explode(sList))
 
 (* alphaNumCheck x 
