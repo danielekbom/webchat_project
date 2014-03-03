@@ -336,7 +336,7 @@ fun changeUserField(name, stream, replacement, whichField) =
 		else 
 			if newField <> thisLine then newField ^ inputAll(stream) else newField ^ changeUserField(name, stream, replacement, whichField)
 	end
-	
+
 fun addToPostCount(User(name, _, _, post)) =
 	let
 		val userStream = openIn("../webchat/users.txt")
@@ -347,7 +347,22 @@ fun addToPostCount(User(name, _, _, post)) =
 		(output(openUserStream, newText); closeOut(openUserStream))
 	end
   | addToPostCount(EmptyUser) = raise generalErrorMsg "Error in function addToPostCount"
-	
+
+(* postMessage(user as User(name, pw, date, postCount), chatName)
+ * TYPE: User * string -> ()
+ * PRE: none
+ * POST: ()
+ * SIDE EFFECTS: val message = the value of the postTextField in the html script
+				 if message <> "" then
+					remove illegal chars and replace smiley text with the html code for smiley images
+					save the message to chatName.txt following chat text file rules
+					increase the postCount of a user in users.txt following user file rules
+					
+					generateChat(chatName, User(name, pw, date, postCount+1))
+				 else
+					genereateChat(chatName, user)
+ * EXCEPTIONS: if user = EmptyUser then raise generalErrorMsg
+ *)  
 fun postMessage(user as User(name, pw, date, postCount),chatName) =
 	let
 		val message = getOpt(cgi_field_string("postTextField"), "")
