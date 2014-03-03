@@ -37,6 +37,12 @@ datatype message = MSG of (string * string * string)
  *)
 datatype chat = Chat of (string * message list) | EmptyChat
 
+(* getSmiley char 
+ * TYPE: char -> string
+ * PRE: none
+ * POST: if char is "P", "D", ")", "(", "O" or "3" then a string of html code for displaying and finding the address for the corresponding jpg image
+		 else the string ":" concatenated with char
+ *)
 fun getSmiley (#"P") = "<img class=\"smiley\" src=\"" ^ websiteURL ^ "styles/images/smileys/blub.jpg\" />"
   | getSmiley (#"D") = "<img class=\"smiley\" src=\"" ^ websiteURL ^ "styles/images/smileys/happy.jpg\" />"
   | getSmiley (#")") = "<img class=\"smiley\" src=\"" ^ websiteURL ^ "styles/images/smileys/original.jpg\" />"
@@ -45,6 +51,13 @@ fun getSmiley (#"P") = "<img class=\"smiley\" src=\"" ^ websiteURL ^ "styles/ima
   | getSmiley (#"3") = "<img class=\"smiley\" src=\"" ^ websiteURL ^ "styles/images/smileys/heart.jpg\" />"
   | getSmiley (x) = ":" ^ implode([x]) (*Char.toString(x)*)
  
+(* insertSmiley x 
+ * TYPE: char list -> string
+ * PRE: none
+ * POST: x as a string with sublists of x such as [#":", #"P"], [#":", #"D"], [#":", #")"], [#":", #"("], [#":", #"O"], [#":", #"3"] replaced with html code for displaying and finding the address for the corresponding jpg image
+ *
+ * VARIANT: length of x
+ *)
 fun insertSmiley [] = ""
   | insertSmiley (x::[]) = implode([x]) (*Char.toString(x)*)
   | insertSmiley ((#":")::(#":")::tail) = ":" ^ insertSmiley(#":"::tail)
