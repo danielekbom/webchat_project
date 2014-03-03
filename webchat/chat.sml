@@ -49,7 +49,7 @@ datatype user = User of (string * string * string * int) | EmptyUser
  *  The form of a message is muName ^ "@" ^ mPostDate ^ "@" ^ mText ^ "@"
  *  Example: "daniel@Sun Mar  2 14:06:44 2014@Hej@daniel@Sun Mar  2 14:06:45 2014@då@"
  *  If a chat file contained this it would contain 2 messages, both from the user named daniel.
- *  Henceforth if we are adding a message to a chat file we will write that we add MSG(xxx, yyy, zzz) to the chat file which means we add xxx ^ "@" ^ yyy ^ "@" ^ zzz ^ "@"
+ *  Henceforth if we are adding a message to a chat file we will write that we add MSG(xxx, yyy, zzz) to a chat file which means we add xxx ^ "@" ^ yyy ^ "@" ^ zzz ^ "@"
  *  Example1: Adds User("daniel", currentTime, "hejjjjjj") to the chat file Main.
  *  What we mean here is that we add the string "daniel" ^ "@" ^ currentTime ^ "@" ^ "hejjjjjj" ^ "@" to the end of of the chat file Main
  *)
@@ -69,11 +69,9 @@ datatype message = MSG of (string * string * string)
  *  cName is stored in the master file and in the form cName ^ "\n". Multiple chats are stored as cName1 ^ "\n" ^ cName2 ^ "\n" ^ cName3 ^ "\n"
  *  Example: "Main\nGames\nIT\n"
  *  mList is stored in the chat file cName as described in the Important Message notes.
- *  If a chat file contained this it would contain 2 messages, both from the user named daniel.
  *  Henceforth if we are creating or deleting the Chat(cName, cmList) we will write that we add/remove chat cName to/from the master file 
- *  Example1: Adds chat "cars" to the master file
- *  What we mean here is that we add the string "cars\n" to the end of of the master file.
- *  Also creates the file "cars.txt"
+ *  Example1: Created chat "cars"
+ *  What we mean here is that we add the string "cars\n" to the end of of the master file, and also created the chat file "cars.txt"
  *)
 datatype chat = Chat of (string * message list) | EmptyChat
 
@@ -421,11 +419,11 @@ fun addToPostCount(User(name, _, _, post)) =
  * TYPE: User * string -> ()
  * PRE: none
  * POST: ()
- * SIDE EFFECTS: val message = the value of the postTextField in the html script
+ * SIDE EFFECTS: val message = the value of postTextField in the html script
 				 if message <> "" then
-					remove illegal chars and replace smiley text with the html code for smiley images
-					save the message to chatName.txt following chat text file rules
-					increase the postCount of a user in users.txt following user file rules
+					val message = remove illegal chars and replace smiley text with the html code for smiley images for message
+					Adds MSG(user, currentDate, message) to the chat chatName
+					Increases the uPostCount of user by 1
 					
 					generateChat(chatName, User(name, pw, date, postCount+1))
 				 else
@@ -444,7 +442,7 @@ fun postMessage(user as User(name, pw, date, postCount),chatName) =
 (* chatExists(chatName, stream)
  * TYPE: string * instream -> bool
  * PRE: none
- * POST: if chatName ^ "\n" is a line in the stream then true
+ * POST: if the chat chatName exists in the master file then true
 		 else false
  * SIDE EFFECTS: Advances the stream
 				 Closes stream
@@ -466,14 +464,12 @@ fun chatExists (chatName,stream) =
  * TYPE: string * User -> ()
  * PRE: none
  * POST: ()
- * SIDE EFFECTS: Opens an outstream to the end of "../webchat/chats/chats.master"
- 
+ * SIDE EFFECTS: Opens an outstream to the master file
 				 if chatName contains only alphanumeric chars then
-					Opens an instream to "../webchat/chats/chats.master"
-					if chatName ^ "\n" is a line in the previously opened instream then
-						Outputs chatName ^ "\n" to the previously created outstream
-						Closes the previously created outstream
-						Opens an outstream to "../webchat/chats/ ^ chatName ^ ".txt"
+					Opens an instream to the master file
+					if chat chatName does not exist in the master file then
+						Create chat chatName
+						Closes the previously opened outstream
 						
 						generateChat(chatName, user)
 					else
@@ -497,7 +493,7 @@ fun createNewChat (chatName,user) =
  * TYPE: string * User -> ()
  * PRE: none
  * POST: ()
- * SIDE EFFECTS: Opens an outstream to "../webchat/chats/" ^ chatName ^ ".txt"
+ * SIDE EFFECTS: Opens an outstream to the chat chatName
 				 Outputs "" to the previously opened outstream
 				 Closes the previously opened outstream
 				 
@@ -531,12 +527,11 @@ fun deleteChatAux (chatName,stream) =
  * TYPE: string * User -> ()
  * PRE: a file named chatName ^ .txt exists in ../webchat/chats
  * POST: ()
- * SIDE EFFECTS: Opens an instream to "../webchat/chats/chats.master"
+ * SIDE EFFECTS: Opens an instream to the master file
 				 Closes the previously opened instream
-				 Opens an outstream from "../webchat/chats/chats.master"
-				 Outputs the contents of "../webchat/chats/chats.master" without chatName
+				 Opens an outstream from the master file
+				 Deletes chat chatName
 				 Closes the previously opened outStream
-				 Removes the file "../webchat/chats/" ^ chatName ^ ".txt"
 				 
 				 generateChat("Main", user)
  *)
