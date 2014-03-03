@@ -20,6 +20,21 @@ exception generalErrorMsg of string
 	
  * REPRESENTATION INVARIANT: none
  *)
+(*
+ *  Important user note
+ *  Users are saved in the file "webchat/users.txt", we will refer to it as the "users text file".
+ *  An EmptyUser is not saved in the users text file
+ *  A User(uName, uPassword, uDate, uPostCount) is saved as one line in the users text file.
+ *  The form of this is uname ^ ">" ^ uPassword ^ ">" ^ uDate ^ ">" ^ uPostCount ^ "\n"
+ *  Example: "daniel>3124823948589>Sun Mar  2 15:01:50 2014>1\nKlas>11044963957762426472653228025194827091584>Sun Mar  2 15:01:50 2014>1"
+ *  If the user text file contained this it would contain 2 users, named daniel and Klas.
+ *  Henceforth if we are modifying a user in the users text we will refer to this user by its uName.
+ *  Example1: This function deletes the user of uName xxxx in the users text file.
+ *  What we mean here is that we remove the whole substring "xxxx>uPassword>uDate>uPostCount\n"
+ *  Example2: This functions increase the uPostCount of the user xxxxx by 1.
+ *  This means that "xxxx>uPassword>uDate>uPostCount\n" the substring uPostCount which will always be a number is increased by 1. The rest of the file remains unchanged
+ *  We may also write: we add the User(xxx, yyy, zzz, vvv) to the users text file. This means that we add xxx ^ ">" ^ yyy ^ ">" ^ zzz ^ ">" ^ vvv ^ "\n" to the end of the users text file
+*)
 datatype user = User of (string * string * string * int) | EmptyUser
 
 (* REPRESENTATION CONVENTION: Represents a message in a chat forum
@@ -27,13 +42,38 @@ datatype user = User of (string * string * string * int) | EmptyUser
  
  * REPRESENTATION INVARIANT: None 
  *)
+(*
+ *  Important Message notes
+ *  Messages are saved in files called "webchat/chats/xxxxxx.txt", where xxxxxx is a name, we will refer to it as the "chat file xxxxxx", or in general as a "chat file".
+ *  A MSG(muName, mPostDate, mText) is stored as a string in a chat file. Multiple messages are stored as message1^message2^message3 in a chat file.
+ *  The form of a message is muName ^ "@" ^ mPostDate ^ "@" ^ mText ^ "@"
+ *  Example: "daniel@Sun Mar  2 14:06:44 2014@Hej@daniel@Sun Mar  2 14:06:45 2014@då@"
+ *  If a chat file contained this it would contain 2 messages, both from the user named daniel.
+ *  Henceforth if we are adding a message to a chat file we will write that we add MSG(xxx, yyy, zzz) to the chat file which means we add xxx ^ "@" ^ yyy ^ "@" ^ zzz ^ "@"
+ *  Example1: Adds User("daniel", currentTime, "hejjjjjj") to the chat file Main.
+ *  What we mean here is that we add the string "daniel" ^ "@" ^ currentTime ^ "@" ^ "hejjjjjj" ^ "@" to the end of of the chat file Main
+ *)
 datatype message = MSG of (string * string * string)
 
-(* REPRESENTATION CONVENTION: Represents a forum in the web chat
-   Chat(name, msgList) - A forum with name and msgList as a list of messages
+(* REPRESENTATION CONVENTION: Represents a chat in the web chat
+   Chat(cName, msgList) - A chat with name cName and msgList as a list of messages
    EmptyChat - Represents and empty chat with no name
 	
  * REPRESENTATION INVARIANT: None
+ *)
+(*
+ *  Important chat note
+ *  Chats are saved in the file called "webchat/chats/chats.master", which we will refer to as the "master file".
+ *  EmptyChats are not saved in any file.
+ *  A Chat(cName, mList) is stored as a string in a the master file and a string in the chat file cName.
+ *  cName is stored in the master file and in the form cName ^ "\n". Multiple chats are stored as cName1 ^ "\n" ^ cName2 ^ "\n" ^ cName3 ^ "\n"
+ *  Example: "Main\nGames\nIT\n"
+ *  mList is stored in the chat file cName as described in the Important Message notes.
+ *  If a chat file contained this it would contain 2 messages, both from the user named daniel.
+ *  Henceforth if we are creating or deleting the Chat(cName, cmList) we will write that we add/remove chat cName to/from the master file 
+ *  Example1: Adds chat "cars" to the master file
+ *  What we mean here is that we add the string "cars\n" to the end of of the master file.
+ *  Also creates the file "cars.txt"
  *)
 datatype chat = Chat of (string * message list) | EmptyChat
 
@@ -242,9 +282,11 @@ fun generateChat(chat,User(userName,_,date,postCount)) =
 	in
 		print ("<div class=\"chatMainDiv\"><div id=\"chatMessagesDiv\"><h3>"
 		^ chat ^ " chat</h3>" 
-		^ messages ^ " </div><div id=\"chatListDiv\">Chats<br />" ^ mainChatList(userName) ^ "</div><br /><div class=\"createChatDiv\">Create chat<br /><form action=\"" ^ cgiURL ^ "chat.cgi\" method=\"post\" class=\"createChatForm\"><input type=\"text\" name=\"chatName\" class=\"newChatTextField\"><br /><input type=\"hidden\" name=\"formType\" value=\"createNewChat\"><input type=\"hidden\" name=\"username\" value=\""
+		^ messages ^ " </div><div id=\"chatListDiv\">Chats<br />" ^ mainChatList(userName) ^ "</div><br /><div class=\"createChatDiv\">Create chat<br /><form action=\"" 
+		^ cgiURL ^ "chat.cgi\" method=\"post\" class=\"createChatForm\"><input type=\"text\" name=\"chatName\" class=\"newChatTextField\"><br /><input type=\"hidden\" name=\"formType\" value=\"createNewChat\"><input type=\"hidden\" name=\"username\" value=\""
 		^ userName ^ "\"><button type=\"submit\">Create</button></form></div><br /><div class=\"yourProfileDiv\"><h3>Your profile</h3>Name: " 
-		^ userName ^ "<br />Posts: " ^ Int.toString(postCount) ^ "<br />Signup: " ^ formatedDate ^ "</div><br /><div class=\"logoutDiv\"><form action=\"" ^ websiteURL ^ "\" method=\"post\"><button type=\"submit\">Logout</button></form></div><div class=\"writeMessageDiv\"><form name=\"postMessage\" method=\"post\" action=\""
+		^ userName ^ "<br />Posts: " ^ Int.toString(postCount) ^ "<br />Signup: " ^ formatedDate ^ "</div><br /><div class=\"logoutDiv\"><form action=\"" 
+		^ websiteURL ^ "\" method=\"post\"><button type=\"submit\">Logout</button></form></div><div class=\"writeMessageDiv\"><form name=\"postMessage\" method=\"post\" action=\""
 		^ cgiURL ^ "chat.cgi\"><input type=\"text\" onkeyup=\"msgChanged()\" name=\"postTextField\" id=\"postTextField\" class=\"postTextField\" value=\""
 		^ currentMsgInput ^ "\" onfocus=\"this.value = this.value;\"><input type=\"hidden\" name=\"formType\" value=\"postMessage\"><input type=\"hidden\" name=\"username\" value=\""
 		^ userName ^ "\"><input type=\"hidden\" name=\"chatName\" value=\"" ^ chat ^ "\"><button type=\"submit\" name=\"submit\" value=\"post\" id=\"postSubmit\">Post</button></form></div></div><form name=\"reloadChat\" id=\"reloadChat\" method=\"post\" action=\""
