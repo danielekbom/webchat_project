@@ -37,3 +37,6 @@
 
 ("27. readMSG = ", readMSG(MSG("Hej","pa","dej")) = "<b>Hej</b> pa:<br /><i>dej</i><br /><div class=\"chatPostLine\"></div>")
 ("28. readMSGS = ", readMSGS(Chat(_,[MSG("Hej","pa","dej"),MSG("tja","pa","er")])) = "<b>Hej</b> pa:<br /><i>dej</i><br /><div class=\"chatPostLine\"></div><b>tja</b> pa:<br /><i>er</i><br /><div class=\"chatPostLine\"></div>")
+
+("29. changeUserFieldInFile = ", changeUserFieldInFile("Daniel","Daniel>348934853498>hej>2\n","bertil",3) = "Daniel>348934853498>bertil>2\n")
+("30. changeUserFieldInFile = ", changeUserFieldInFile("Daniel","Oscar>348934853498>hej>2\n","bertil",3) = "Oscar>348934853498>hej>2\n")

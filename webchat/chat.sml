@@ -447,7 +447,7 @@ fun generateChat(chat,User(userName,_,date,postCount)) =
  * POST: ()
  *
  * SIDE-EFFECTS: if user <> EmptyUser and pw = password then
-					Prints html code for the chat Main
+					Prints html code including the data from the user and the name and messages from chat file "Main"
 				 else prints a message declaring that username or password is wrong.
  *)
 fun login(user, password) =
@@ -468,7 +468,7 @@ fun login(user, password) =
  * SIDE-EFFECTS: if pw <> repeatPw then prints "Username/password cantains illegal characters,<br />please use alpha-numeric characters only."
 				 else if size of password and name are not in the interval [3, 10] then prints "Username/password must contain between 3 and 10 characters."
 				 else if a user with uName = userName in the users text file exists then prints "User already exists"
-				 else a user User(username, encrypt(pw), currentTime, 0) is saved in the users text file and login(user, PasswordRepeat)
+				 else a user User(username, encrypt(pw), currentTime, 0) is saved in the users text file and then prints html code including the data from the user and the name and messages from chat file "Main".
  *)
 fun signup(name, password, passwordRepeat) =
     let
@@ -493,10 +493,10 @@ fun signup(name, password, passwordRepeat) =
 
 	
 (* saveMsgToFile(message,chatName,userName)
- * TYPE: string * string * string -> string
- * PRE: none
+ * TYPE: string * string * string -> unit
+ * PRE: true
  * POST: ()
- * SIDE EFFECTS: Adds MSG(userName, currentTime, if the size of message > 1000 then (the first 1000 chars of message) ^ "..." else message) to chatName chat file
+ * SIDE EFFECTS: Adds MSG(userName, current servertime as a string, if the size of message > 1000 then (the first 1000 chars of message) ^ "..." else message) to chatName chat file
  *)
 fun saveMsgToFile(msg,chatName,userName) =
 	let
@@ -508,7 +508,7 @@ fun saveMsgToFile(msg,chatName,userName) =
 	
 (* changeUserFieldInFile(userName, userFileLine, replacement, whichField)
  * TYPE: string * string * string * int -> string
- * PRE: userFileLine is in the form of a user string as saved in the users text file and the difference 0 < whichField < 5 is true
+ * PRE: userFileLine is in the form of a user string as saved in the users text file and the statement (0 < whichField < 5) is true
  * POST:if userName = uName of userFileLine then
 			if whichField = 1 then userFileLine with uName replaced by replacement
 			if whichField = 2 then userFileLine with uPassword replaced by replacement
@@ -516,7 +516,9 @@ fun saveMsgToFile(msg,chatName,userName) =
 			if whichField = 4 then userFileLine with uPostCount replaced by replacement
 		else
 			userFileLine
- * EXCEPTIONS: if not 0 < whichField < 5 then raise postCountUpdate
+ * EXAMPLE: changeUserFieldInFile("Daniel","Daniel>348934853498>hej>2\n","bertil",3) = "Daniel>348934853498>bertil>2\n"
+ * EXAMPLE: changeUserFieldInFile("Daniel","Oscar>348934853498>hej>2\n","bertil",3) = "Oscar>348934853498>hej>2\n"
+ * EXCEPTIONS: if not(0 < whichField < 5) then raise postCountUpdate
 			   if userFileLine is not in the format of a user string then raise postCountUpdate
  *)
 fun changeUserFieldInFile(name, streamLine, replacement, whichField) = let
@@ -540,16 +542,12 @@ fun changeUserFieldInFile(name, streamLine, replacement, whichField) = let
 	end
 
 (* changeUserField(userName, userFileStream, replacement, whichField)
- * TYPE: string * TextIO.instream * string * int -> unit
- * PRE: none
+ * TYPE: string * TextIO.instream * string * int -> string
+ * PRE: 0 < whichField < 5. userFileStream must only contain user strings.
  * POST: if userName = (a substring of a line in userFileStream starting from index 0 and ending at the index of the first ">" in the line) then
-			The contents of userFileStream as a string where the line matching the above condition named userFileLine equals
-			if userFileLine is in the format subString1 ^ ">" ^ subString2 ^ ">" ^ subString3 ^ ">" ^ subString4 then
+			The contents of userFileStream as a string where the line matching the above condition named userFileLine is in the format
+			subString1 ^ ">" ^ subString2 ^ ">" ^ subString3 ^ ">" ^ subString4 then
 				replacement as subString[whichField] in subString1 ^ ">" ^ subString2 ^ ">" ^ subString3 ^ ">" ^ subString4
-			else postCountUpdate raised by changeUserFieldInFile
-		 else postCountUpdate raised by changeUserFieldInFile
-		
-			
  * VARIANT: lines in UserFileStream
  * SIDE EFFECTS: advances the current stream position
  *)		
@@ -570,7 +568,8 @@ fun changeUserField(name, stream, replacement, whichField) =
  * TYPE: user -> unit
  * PRE: user <> EmptyUser
  * POST: ()
- * SIDE EFFECTS: Sets the uPostCount of user uName to postCount+1 in the users text file
+ * SIDE EFFECTS: Sets the uPostCount of user uName to postCount+1 in the users text file.
+				 
  * EXCEPTIONS: if user = EmptyUser then raise generalErrorMsg
  *)
 fun addToPostCount(User(name, _, _, post)) =
