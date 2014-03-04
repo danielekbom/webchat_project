@@ -10,7 +10,7 @@ open rsa;
 val cfgStream = openIn("../webchat/url.cfg");
 val websiteURL = implode(List.filter (fn x => x <> #"\n") (explode(inputLine(cfgStream))));
 val cgiURL = implode(List.filter (fn x => x <> #"\n") (explode(inputLine(cfgStream))));
-val a = closeIn(cfgStream);
+val cfgStream = closeIn(cfgStream);
 
 exception generalErrorMsg of string
 
@@ -25,7 +25,7 @@ exception generalErrorMsg of string
  *  Users are saved in the file "webchat/users.txt", we will refer to it as the "users text file".
  *  An EmptyUser is not saved in the users text file
  *  A User(uName, uPassword, uDate, uPostCount) is saved as one line in the users text file.
- *  The form of this is uname ^ ">" ^ uPassword ^ ">" ^ uDate ^ ">" ^ uPostCount ^ "\n"
+ *  The form of this is uname ^ ">" ^ uPassword ^ ">" ^ uDate ^ ">" ^ uPostCount ^ "\n", we will call this a user string.
  *  Example: "daniel>3124823948589>Sun Mar  2 15:01:50 2014>1\nKlas>11044963957762426472653228025194827091584>Sun Mar  2 15:01:50 2014>1"
  *  If the user text file contained this it would contain 2 users, named daniel and Klas.
  *  Henceforth if we are modifying a user in the users text we will refer to this user by its uName.
@@ -46,7 +46,7 @@ datatype user = User of (string * string * string * int) | EmptyUser
  *  Important Message notes
  *  Messages are saved in files called "webchat/chats/xxxxxx.txt", where xxxxxx is a name, we will refer to it as the "chat file xxxxxx", or in general as a "chat file".
  *  A MSG(muName, mPostDate, mText) is stored as a string in a chat file. Multiple messages are stored as message1^message2^message3 in a chat file.
- *  The form of a message is muName ^ "@" ^ mPostDate ^ "@" ^ mText ^ "@"
+ *  The form of a message is muName ^ "@" ^ mPostDate ^ "@" ^ mText ^ "@", we will call this a message string
  *  Example: "daniel@Sun Mar  2 14:06:44 2014@Hej@daniel@Sun Mar  2 14:06:45 2014@då@"
  *  If a chat file contained this it would contain 2 messages, both from the user named daniel.
  *  Henceforth if we are adding a message to a chat file we will write that we add MSG(xxx, yyy, zzz) to a chat file which means we add xxx ^ "@" ^ yyy ^ "@" ^ zzz ^ "@"
@@ -87,7 +87,7 @@ fun getSmiley (#"P") = "<img class=\"smiley\" src=\"" ^ websiteURL ^ "styles/ima
   | getSmiley (#"(") = "<img class=\"smiley\" src=\"" ^ websiteURL ^ "styles/images/smileys/sad.jpg\" />"
   | getSmiley (#"O") = "<img class=\"smiley\" src=\"" ^ websiteURL ^ "styles/images/smileys/suprised.jpg\" />"
   | getSmiley (#"3") = "<img class=\"smiley\" src=\"" ^ websiteURL ^ "styles/images/smileys/heart.jpg\" />"
-  | getSmiley (x) = ":" ^ implode([x]) (*Char.toString(x)*)
+  | getSmiley (x) = ":" ^ implode([x])
  
 (* insertSmiley x 
  * TYPE: char list -> string
@@ -97,7 +97,7 @@ fun getSmiley (#"P") = "<img class=\"smiley\" src=\"" ^ websiteURL ^ "styles/ima
  * VARIANT: length of x
  *)
 fun insertSmiley [] = ""
-  | insertSmiley (x::[]) = implode([x]) (*Char.toString(x)*)
+  | insertSmiley (x::[]) = implode([x])
   | insertSmiley ((#":")::(#":")::tail) = ":" ^ insertSmiley(#":"::tail)
   | insertSmiley ((#":")::y::tail) = getSmiley(y) ^ insertSmiley(tail)
   | insertSmiley (x::tail) = implode([x]) ^ insertSmiley(tail)
@@ -115,7 +115,7 @@ fun filterChar #"<" = "&lt;"
   | filterChar #"&" = "&amp;"
   | filterChar #"@" = "&#64;"
   | filterChar #">" = "&#62;"
-  | filterChar ch = implode([ch]) (*Char.toString(ch)*);
+  | filterChar ch = implode([ch]);
  
 (* filterString sList 
  * TYPE: string -> string
@@ -164,7 +164,7 @@ fun getName [] = []
  * POST: returns the first line in stream that begins with name, if no line begins with name then ""
  *
  * SIDE-EFFECTS: advances the current stream position
- *               closes stream if it is endofstream, freeing associated resources
+ *               closes stream if it is endofstream
  *
  * VARIANT: length of stream
  *)
@@ -174,26 +174,27 @@ fun getUser(is, name) =
 	val line = inputLine(is);
 	val linename = implode(getName(explode(line)));
     in
-	if(cond) then (closeIn(is); "") else if(nameToLower(linename) = nameToLower(name)) then line else getUser(is, name)
+	if(cond) then (closeIn(is); "") else if(nameToLower(linename) = nameToLower(name)) then (closeIn(is); line) else getUser(is, name)
     end;
 
-(* splitList x, y, c
+(* splitList (x, y, c)
  * TYPE: ''a list * ''a list list * ''a -> ''a list list
- * PRE: none
- * POST: y added with elements from x separated by c... 
+ * PRE: y may not be empty when x isn't empty
+ * POST: if the first element of x = c then a list starting with the reverse ordered first element of y followed by lists of x divided by and not including elements of x = c, followed by the rest of the elements in y
+		 else a list starting with the reverse ordered first element of y followed by elements of x ending when an element of x = c, followed by lists of x divided by and not including elements of x = c, followed by the rest of the elements in y
  *
- * EXCEPTIONS: raises Domain if...
+ * EXCEPTIONS: if y is empty but x isn't then raise Domain 
  *)
 fun splitList ([], y, _) = y
   | splitList((x::[]), y::ys, char) = if(x = char) then rev(y)::ys else splitList([], (rev(x::y) :: ys), char)
   | splitList((x::xs), y::ys, char) = if(x = char) then rev(y)::splitList(xs, []::ys, char) else splitList(xs, ((x::y) :: ys), char)
   | splitList(_,_,_) = raise Domain;
 
-(* returnUser l 
+(* returnUser userString
  * TYPE: string -> user
  * PRE: none
- * POST: If l is on the format subString1::">"::subString2::">"subString3::">"::(subString4 able to be parsed as integer) + possible extra characters starting with ">" 
-		 then User with attributes subString1, subString2, subString3, integer parsed from subString4
+ * POST: If userString is in the format subString1 ^ ">" ^ subString2 ^ ">" ^ subString3 ^ ">" ^ (subString4 able to be parsed as integer) ((((((+ possible extra characters starting with ">" )))))Vad e detta btw XXXXXXXXXXXXXXXXX)
+		 then User(subString1, subString2, subString3, integer parsed from subString4)
          else EmptyUser
  *)
 fun returnUser l =
@@ -212,12 +213,17 @@ fun formatDate date = String.substring(date,4,7) ^ String.substring(date,size(da
 
 (* checkLogin (user, input)
  * TYPE: user * string -> bool
- * PRE: none
- * POST: true if user is on the from user(a, b, c, d) and b = input else false
+ * PRE: user <> EmptyUser
+ * POST: true if user is on the form User(a, b, c, d) and b = input else false
  *)	  
 fun checkLogin (User(_,y,_,_), input) = y = input
   | checkLogin (EmptyUser, _) = raise generalErrorMsg "Error in function checkLogin"
 
+(* mainChatList(userName)
+ * TYPE: user * string -> bool
+ * PRE: user <> EmptyUser
+ * POST: true if user is on the form User(a, b, c, d) and b = input else false
+ *)	  
 fun mainChatList(userName) = 
 	let
 		val inStream = openIn("../webchat/chats/chats.master")
@@ -233,17 +239,30 @@ fun mainChatList(userName) =
 	in
 		mainChatList'(inStream)
 	end;
-
+	
+(* readChat chatName
+ * TYPE: string -> chat
+ * PRE: chat file chatName exists and is a chat file
+ * POST: Chat(chatName, (a message list where every element is a message string from chat file chatName)
+ *)
 fun readChat chatName = 
     let
-	val chatStream = openIn(chatName)
-	val totalChat = inputAll(chatStream)
-	
-	fun readChat'([]) = []
-	  | readChat'(x::y::z::xs) = MSG(x, y, z)::readChat'(xs)
-	  | readChat'(x::xs) = if x = "\n" then [] else []
+		val chatStream = openIn(chatName)
+		val totalChat = inputAll(chatStream)
+		val _ = closeIn(chatStream)
+		
+		(* readChat' msgList
+		 * TYPE: string list -> message list
+		 * PRE: true
+		 * POST: if length(msgList) >= 3 then a list of MSG(x,y,z) where x,y,z are 3 consecutive elements in msgList. When there are less than 3 elements in msgList remaining nothing more is added
+				 else []
+		 * VARIANT: length msgList
+		 *)
+		fun readChat'([]) = []
+		  | readChat'(x::y::z::xs) = MSG(x, y, z)::readChat'(xs)
+		  | readChat'(x::xs) = []
     in
-	(closeIn(chatStream); Chat(chatName, readChat'(map implode(splitList(explode(totalChat), [[]], #"@")))))
+		Chat(chatName, readChat'(map implode(splitList(explode(totalChat), [[]], #"@"))))
     end;
 
 (* readMSG msg
@@ -253,23 +272,22 @@ fun readChat chatName =
  *)	
 fun readMSG(MSG(x, y, z)) = ("<b>" ^ x ^ "</b>" ^ " " ^ y ^ ":<br /><i>" ^ z ^ "</i><br /><div class=\"chatPostLine\"></div>")
 
-(* readMSGS chat
+(* readMSGS(chat as Chat(_, msgList))
  * TYPE: chat -> string
- * PRE: none
- * POST: the attributes from msg added together with proper html code
- *
- * EXCEPTIONS: raises Domain if...
+ * PRE: chat <> EmptyChat
+ * POST: the attributes from msgList added together with proper html code
+ * VARIANT: length msgList
+ * EXCEPTIONS: raises Domain if chat = EmptyChat
  *)	
 fun readMSGS (Chat(name, [])) = ""
   | readMSGS (Chat(name,x::xs)) = readMSG(x) ^ readMSGS (Chat(name,xs))
   | readMSGS _ = raise Domain (* Varför raise domain här? Ska vi inte pattern matcha EmptyChat på detta ställe?*)
 
-(* generateChat (chat, user)
- * TYPE: string * user -> ()
- * PRE: none
+(* generateChat (chatName, user)
+ * TYPE: string * user -> unit
+ * PRE: user <> EmptyUser
  * POST: ()
- *
- * SIDE-EFFECTS: Prints html code including the data from the user and the name and messages from the file with name chat
+ * SIDE-EFFECTS: Prints html code including the data from the user and the name and messages from chatName chat file.
  * EXCEPTIONS: raises generalErrorMsg if user is EmptyUser
  *)	
 fun generateChat(chat,User(userName,_,date,postCount)) = 
@@ -295,16 +313,18 @@ fun generateChat(chat,User(userName,_,date,postCount)) =
 	end
   | generateChat(_,EmptyUser) = raise generalErrorMsg "Error in function generateChat"
 
-(* login user
- * TYPE: user -> ()
+(* login(user as User(name, pw, _, _), password)
+ * TYPE: user * string -> unit
  * PRE: none
  * POST: ()
  *
- * SIDE-EFFECTS: Prints html code for the main chat if password from user is equal to the field password else prints a message declaring that username or password is wrong.
+ * SIDE-EFFECTS: if user <> EmptyUser and pw = password then
+					Prints html code for the chat Main
+				 else prints a message declaring that username or password is wrong.
  *)
-fun login(user) =
+fun login(user, password) =
     let
-		val password = encrypt(getOpt(cgi_field_string("password"), ""))
+		val password = if password = "" then "" else encrypt(password)
 		val loginSuccess =  user <> EmptyUser andalso checkLogin(user, password)
     in
 		if(loginSuccess) then 
@@ -313,10 +333,17 @@ fun login(user) =
 			print ("Wrong username or password :(")
     end;
 
-fun signup(name) =
+(* signup(userName, pw, repeatPw)
+ * TYPE: string * string * string -> unit
+ * PRE: none
+ * POST: ()
+ * SIDE-EFFECTS: if pw <> repeatPw then prints "Username/password cantains illegal characters,<br />please use alpha-numeric characters only."
+				 else if size of password and name are not in the interval [3, 10] then prints "Username/password must contain between 3 and 10 characters."
+				 else if a user with uName = userName in the users text file exists then prints "User already exists"
+				 else a user User(username, encrypt(pw), currentTime, 0) is saved in the users text file and login(user, PasswordRepeat)
+ *)
+fun signup(name, password, passwordRepeat) =
     let
-		val password = getOpt(cgi_field_string("password"), "")
-		val passwordRepeat = getOpt(cgi_field_string("repeatPassword"), "")
 		val stringSizeChecked = stringSizeCheck(password) andalso stringSizeCheck(name)
     in
 		if password = passwordRepeat then 
@@ -324,11 +351,11 @@ fun signup(name) =
 				val password = encrypt(password)
 				val inStream = openIn "../webchat/users.txt"
 				val successName = getUser(inStream, name) = ""
-				val outStream = (closeIn(inStream); openAppend ("../webchat/users.txt"))
+				val outStream = openAppend("../webchat/users.txt")
 				val date = Date.toString(Date.fromTimeUniv(Time.now()))
 				val nameAlphaNumCheck = (alphaNumCheck(explode(name)) andalso alphaNumCheck(explode(password)))
 			in
-				if successName andalso nameAlphaNumCheck andalso stringSizeChecked then (output(outStream, name ^ ">" ^ password ^ ">" ^ date ^ ">" ^ "0\n"); closeOut(outStream); login(User(name,password,date,0)))
+				if successName andalso nameAlphaNumCheck andalso stringSizeChecked then (output(outStream, name ^ ">" ^ password ^ ">" ^ date ^ ">" ^ "0\n"); closeOut(outStream); login(User(name,password,date,0), passwordRepeat))
 			else 
 				if not(nameAlphaNumCheck) then print("Username/password cantains illegal characters,<br />please use alpha-numeric characters only.") else if not(stringSizeChecked) then print("Username/password must contain between 3 and 10 characters.") else print ("User already exists")
 			end
@@ -336,27 +363,33 @@ fun signup(name) =
 			 print ("Passwords do not match")
     end;
 
-fun saveMsgToFile (msg,chatName,userName) =
+	
+(* saveMsgToFile(message,chatName,userName)
+ * TYPE: string * string * string -> string
+ * PRE: none
+ * POST: ()
+ * SIDE EFFECTS: Adds MSG(userName, currentTime, if the size of message > 1000 then (the first 1000 chars of message) ^ "..." else message) to chatName chat file
+ *)
+fun saveMsgToFile(msg,chatName,userName) =
 	let
 		val outStream = openAppend ("../webchat/chats/" ^ chatName ^ ".txt")
 		val resizedMsg = if size msg > 1000 then (String.substring(msg,0,999) ^ "...") else msg
 	in
-		(output (outStream, userName ^ "@" ^ Date.toString(Date.fromTimeUniv(Time.now())) ^ "@" ^ resizedMsg ^ "@"); closeOut (outStream))
+		(output(outStream, userName ^ "@" ^ Date.toString(Date.fromTimeUniv(Time.now())) ^ "@" ^ resizedMsg ^ "@"); closeOut(outStream))
 	end;
-		
-
+	
 (* changeUserFieldInFile(userName, userFileLine, replacement, whichField)
  * TYPE: string * string * string * int -> string
- * PRE: none
- * POST: If userFileLine is in the format subString1 ^ ">" ^ subString2 ^ ">" ^ subString3 ^ ">" ^ subString4 then
-			if userName = subString1 then
-				replacement as subString(whichField) in subString1 ^ ">" ^ subString2 ^ ">" ^ subString3 ^ ">" ^ subString4
-			else
-				userFileLine
+ * PRE: userFileLine is in the form of a user string as saved in the users text file and the difference 0 < whichField < 5 is true
+ * POST:if userName = uName of userFileLine then
+			if whichField = 1 then userFileLine with uName replaced by replacement
+			if whichField = 2 then userFileLine with uPassword replaced by replacement
+			if whichField = 3 then userFileLine with uDate replaced by replacement
+			if whichField = 4 then userFileLine with uPostCount replaced by replacement
 		else
-			raise exception
- * EXCEPTIONS: if not 0 < whichField < 5 then raise postCountUpdate("whichField must be between 1 and 4")
-			   if userFileLine is not in the format of subString1 ^ ">" ^ subString2 ^ ">" ^ subString3 ^ ">" ^ subString4 then raise postCountUpdate
+			userFileLine
+ * EXCEPTIONS: if not 0 < whichField < 5 then raise postCountUpdate
+			   if userFileLine is not in the format of a user string then raise postCountUpdate
  *)
 fun changeUserFieldInFile(name, streamLine, replacement, whichField) = let
 		exception postCountUpdate of string
@@ -379,7 +412,7 @@ fun changeUserFieldInFile(name, streamLine, replacement, whichField) = let
 	end
 
 (* changeUserField(userName, userFileStream, replacement, whichField)
- * TYPE: string * TextIO.instream * string * int -> ()
+ * TYPE: string * TextIO.instream * string * int -> unit
  * PRE: none
  * POST: if userName = (a substring of a line in userFileStream starting from index 0 and ending at the index of the first ">" in the line) then
 			The contents of userFileStream as a string where the line matching the above condition named userFileLine equals
@@ -404,6 +437,14 @@ fun changeUserField(name, stream, replacement, whichField) =
 			if newField <> thisLine then newField ^ inputAll(stream) else newField ^ changeUserField(name, stream, replacement, whichField)
 	end
 
+	
+(* addToPostCount(user as User(uName, pw, date, postCount))
+ * TYPE: user -> unit
+ * PRE: user <> EmptyUser
+ * POST: ()
+ * SIDE EFFECTS: Sets the uPostCount of user uName to postCount+1 in the users text file
+ * EXCEPTIONS: if user = EmptyUser then raise generalErrorMsg
+ *)
 fun addToPostCount(User(name, _, _, post)) =
 	let
 		val userStream = openIn("../webchat/users.txt")
@@ -416,7 +457,7 @@ fun addToPostCount(User(name, _, _, post)) =
   | addToPostCount(EmptyUser) = raise generalErrorMsg "Error in function addToPostCount"
 
 (* postMessage(user as User(name, pw, date, postCount), chatName)
- * TYPE: User * string -> ()
+ * TYPE: User * string -> unit
  * PRE: none
  * POST: ()
  * SIDE EFFECTS: val message = the value of postTextField in the html script
@@ -429,7 +470,7 @@ fun addToPostCount(User(name, _, _, post)) =
 				 else
 					genereateChat(chatName, user)
  * EXCEPTIONS: if user = EmptyUser then raise generalErrorMsg
- *)  
+ *)
 fun postMessage(user as User(name, pw, date, postCount),chatName) =
 	let
 		val message = getOpt(cgi_field_string("postTextField"), "")
@@ -461,7 +502,7 @@ fun chatExists (chatName,stream) =
 
 
 (* createNewChat(chatName, user)
- * TYPE: string * User -> ()
+ * TYPE: string * User -> unit
  * PRE: none
  * POST: ()
  * SIDE EFFECTS: Opens an outstream to the master file
@@ -484,13 +525,16 @@ fun createNewChat (chatName,user) =
 		val chatAlphaNumCheck = alphaNumCheck(explode(chatName))
 	in
 		if chatAlphaNumCheck then
-			(if not(chatExists(chatName, openIn("../webchat/chats/chats.master"))) then (output (outStream,(chatName ^ "\n")); closeOut (outStream); openOut("../webchat/chats/" ^ chatName ^ ".txt"); generateChat(chatName,user)) else print("Chat already exists!"))
+			(if not(chatExists(chatName, openIn("../webchat/chats/chats.master"))) then
+				(output(outStream,(chatName ^ "\n")); closeOut (outStream); closeOut(openOut("../webchat/chats/" ^ chatName ^ ".txt")); generateChat(chatName,user)) 
+			else
+				print("Chat already exists!"))
 		else
 			(closeOut(outStream); print("Chatname cantains illegal characters,<br />please use alpha-numeric characters only."))
 	end;
 
 (* clearChat(chatName, user)
- * TYPE: string * User -> ()
+ * TYPE: string * User -> unit
  * PRE: none
  * POST: ()
  * SIDE EFFECTS: Opens an outstream to the chat chatName
@@ -510,7 +554,7 @@ fun clearChat (chatName,user) =
  * TYPE: string * instream -> string
  * PRE: none
  * POST: The contents of stream with the line equal to chatName ^ "\n" removed
- * SIDE EFFECTS: Advances stream
+ * SIDE EFFECTS: Advances the position of stream
  * VARIANT: lines in stream
  *)
 fun deleteChatAux (chatName,stream) =
@@ -524,18 +568,14 @@ fun deleteChatAux (chatName,stream) =
 	end;
 
 (* deleteChat(chatName, user)
- * TYPE: string * User -> ()
- * PRE: a file named chatName ^ .txt exists in ../webchat/chats
+ * TYPE: string * User -> unit
+ * PRE: chat file chatName exists
  * POST: ()
- * SIDE EFFECTS: Opens an instream to the master file
-				 Closes the previously opened instream
-				 Opens an outstream from the master file
-				 Deletes chat chatName
-				 Closes the previously opened outStream
+ * SIDE EFFECTS: Deletes chat chatName
 				 
 				 generateChat("Main", user)
  *)
-fun deleteChat (chatName,user) =
+fun deleteChat(chatName,user) =
 	let
 		val chatStream = openIn("../webchat/chats/chats.master")
 		val newText = deleteChatAux(chatName,chatStream)
@@ -551,19 +591,47 @@ fun deleteChat (chatName,user) =
  * POST: name where all alphabetical chars are uppercase.
  *)	
 fun nameToLower name = String.map Char.toLower name
-   
+
+
+(* main()
+ * TYPE: unit -> unit
+ * PRE: true
+ * POST: ()
+ * SIDE EFFECTS: Prints initial html code for the webpage...
+ *               MOAR
+ * EXCEPTIONS: if the html variable formType is not equal to one of the following strings:
+				"login"
+				"signup"
+				"postMessage"
+				"createNewChat"
+				"clearChat"
+				"deleteChat"
+				"reloadChat"
+				then raise generalErrorMsg
+ *)	
 fun main() =
 	let
 		val formType = getOpt(cgi_field_string("formType"), "")
+		
 		val name = filterString(getOpt(cgi_field_string("username"), ""))
-		val lowerName = nameToLower name
+		val password = getOpt(cgi_field_string("password"), "")
+		val passwordRepeat = getOpt(cgi_field_string("repeatPassword"), "")
+		
 		val chatName = if getOpt(cgi_field_string("chatName"), "") = "" then "Main" else getOpt(cgi_field_string("chatName"), "")
 		val userList = getUser(openIn "../webchat/users.txt", name)
 		val user = returnUser(userList)
     in
 		(print ("Content-type: text/html\n\n<!DOCTYPE html><html><head><meta charset=\"UTF-8\"><link rel=\"stylesheet\" type=\"text/css\" href=\"" ^ websiteURL ^ "styles/styles.css\" /></head><body>");
 		print "<div class=\"headerDiv\"></div>";
-		(if formType = "login" then login(user) else if formType = "signup" then signup(name) else if formType="postMessage" then postMessage(user,chatName) else if formType="reloadChat" then generateChat(chatName,user) else if formType="createNewChat" then createNewChat(chatName,user) else if formType="clearChat" then clearChat(chatName,user) else if formType="deleteChat" then deleteChat(chatName,user) else raise generalErrorMsg "Error in function Main");
+		(case formType of
+			"login" => login(user, password)
+		  | "signup" => signup(name, password, passwordRepeat)
+		  | "postMessage" => postMessage(user,chatName)
+		  | "createNewChat" => createNewChat(chatName,user)
+		  | "clearChat" => clearChat(chatName,user)
+		  | "deleteChat" => deleteChat(chatName,user)
+		  | "reloadChat" => generateChat(chatName,user)
+		  | _ => raise generalErrorMsg "Error in function Main");
 		print "</body></html>")
     end;
 
