@@ -568,8 +568,10 @@ fun changeUserField(name, stream, replacement, whichField) =
  * TYPE: user -> unit
  * PRE: user <> EmptyUser
  * POST: ()
- * SIDE EFFECTS: Sets the uPostCount of user uName to postCount+1 in the users text file.
-				 
+ * SIDE EFFECTS: Opens instream to the user text file, advances instream, closes instream.
+				 Opens outstream to the user text file.
+				 Sets the uPostCount of user uName to postCount+1 in the outstream.
+				 Closes outstream.
  * EXCEPTIONS: if user = EmptyUser then raise generalErrorMsg
  *)
 fun addToPostCount(User(name, _, _, post)) =
