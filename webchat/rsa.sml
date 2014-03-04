@@ -1,8 +1,8 @@
 (* findE(x, n)
  * TYPE: int/1 * int/1 -> int/1
  * PRE: n > 0
- * POST: the first coprime of x starting from n
- * VARIANT: ????
+ * POST: the lowest coprime of x starting from n
+ * VARIANT: The probability of (x mod n) = 0 (where n is incremented by one in every recursive step)
  *)		
 fun findE(x, n) = if IntInf.eq(IntInf.mod(x, n), IntInf.fromInt(0)) then
 						findE(x, IntInf.+(n, IntInf.fromInt(1))) 
@@ -12,13 +12,16 @@ fun findE(x, n) = if IntInf.eq(IntInf.mod(x, n), IntInf.fromInt(0)) then
  * TYPE: string -> string
  * PRE: n > 0
  * POST: pass with every char replaced by their ascii value
+ * EXAMPLE: convertPassword("hello123") = 979899495051
  *)		
 fun convertPassword pass = foldr (fn (x,y) => Int.toString(ord(x)) ^ y) "" (explode(pass))
 
 (* encrypt(input)
  * TYPE: string -> string
- * PRE: size input > 0
- * POST: ?????????????????????????????????????????????????????????????????????????????????????????
+ * PRE: size input > 1
+ * POST: input as an encrypted string using a simplified version of the RSA algorithm with fixed prime numbers p and q and lowest possible value on e.
+		 This means that input will always be encrypted to the same number regardless of how many times the encrypt function is called.
+         The encryption is one-way in the sense that no decryption key is generated (and also not needed).  
  *)	
 fun encrypt input = 
     let 
