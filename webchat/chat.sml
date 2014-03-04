@@ -218,8 +218,8 @@ fun getName [] = []
  * POST: returns the first line in stream that begins with name, if no line begins with name then ""
  *
  * SIDE-EFFECTS: advances the current stream position
- *               closes stream if it is endofstream
- * EXAMPLE: 
+ *               closes stream
+ * EXAMPLE: getUser (openString("../webchat/users.txt"),"admin") = "admin>7287013848011365457336734959811416142851>Sun Mar  2 13:50:27 2014>" ^ x, where x is a string representing the current postcount for user admin
  * VARIANT: length of stream
  *)
 fun getUser(is, name) = 
@@ -236,7 +236,9 @@ fun getUser(is, name) =
  * PRE: y may not be empty when x isn't empty
  * POST: if the first element of x = c then a list starting with the reverse ordered first element of y followed by lists of x divided by and not including elements of x = c, followed by the rest of the elements in y
 		 else a list starting with the reverse ordered first element of y followed by elements of x ending when an element of x = c, followed by lists of x divided by and not including elements of x = c, followed by the rest of the elements in y
- *
+ * EXAMPLE: splitList([1,2,3],[[]],2) = [[1], [3]]
+ * EXAMPLE: splitList([1,2,3],[[4,5,6],[7,8,9]],1) = [[6, 5, 4], [2, 3], [7, 8, 9]]
+ * EXAMPLE: splitList([1,2,3],[[]],1) = [[], [2, 3]]
  * EXCEPTIONS: if y is empty but x isn't then raise Domain 
  *)
 fun splitList ([], y, _) = y
@@ -247,9 +249,11 @@ fun splitList ([], y, _) = y
 (* returnUser userString
  * TYPE: string -> user
  * PRE: none
- * POST: If userString is in the format subString1 ^ ">" ^ subString2 ^ ">" ^ subString3 ^ ">" ^ (subString4 able to be parsed as integer) ((((((+ possible extra characters starting with ">" )))))Vad e detta btw XXXXXXXXXXXXXXXXX)
+ * POST: If userString is in the format subString1 ^ ">" ^ subString2 ^ ">" ^ subString3 ^ ">" ^ (subString4 able to be parsed as integer) ^ "\n" (^ the rest of userString)
 		 then User(subString1, subString2, subString3, integer parsed from subString4)
          else EmptyUser
+ * EXAMPLE: returnUser "daniel>hej>tjena>1\n lsdkflksdjksjdfdjk" = User("daniel","hej","tjena",1)
+ * EXAMPLE: returnUser "daniel>hej" = EmptyUser
  *)
 fun returnUser l =
     case (map implode(splitList(explode(l),[[]], #">"))) of
@@ -258,10 +262,10 @@ fun returnUser l =
 
 (* formatDate date
  * TYPE: string -> string
- * PRE: none
+ * PRE: size string > 10
  * POST: the characters from date in the index interval (4 -> 10) and interval ((length - 4) -> length)
- *
  * EXAMPLE: formatDate "Fri Mar 21 14:10:45 2014" = "Mar 21 2014"
+ * EXAMPLE: formatDate "Hej jag heter janne" = "jag hetanne"
  *)
 fun formatDate date = String.substring(date,4,7) ^ String.substring(date,size(date)-4,4)
 
@@ -269,18 +273,25 @@ fun formatDate date = String.substring(date,4,7) ^ String.substring(date,size(da
  * TYPE: user * string -> bool
  * PRE: user <> EmptyUser
  * POST: true if user is on the form User(a, b, c, d) and b = input else false
+ * EXAMPLE: checkLogin(User(_,"hej",_,_),"hej") = true
+ * EXAMPLE: checkLogin(User(_,"hej",_,_),"tjena") = false
  *)	  
 fun checkLogin (User(_,y,_,_), input) = y = input
   | checkLogin (EmptyUser, _) = raise generalErrorMsg "Error in function checkLogin"
 
 (* mainChatList(userName)
- * TYPE: user * string -> bool
- * PRE: user <> EmptyUser
- * POST: true if user is on the form User(a, b, c, d) and b = input else false
+ * TYPE: string -> string
+ * PRE: true
+ * POST: 
  *)	  
 fun mainChatList(userName) = 
 	let
 		val inStream = openIn("../webchat/chats/chats.master")
+		(* mainChatList'(is)
+		 * TYPE: instream -> string
+		 * PRE: if not 'is' is at the end of stream, then 'is' must contain the char \n at least once
+		 * POST: 
+		 *)	
 		fun mainChatList'(stream) = 
 			let
 				val endOfFile = endOfStream(stream)

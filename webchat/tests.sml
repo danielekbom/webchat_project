@@ -21,3 +21,16 @@
 
 ("16. getName = ",  getName [#"d", #"a", #"n", #"i", #"e", #"l", #">", #"o", #"s", #"c"] = [#"d", #"a", #"n", #"i", #"e", #"l"])
 ("17. getName = ",  getName [#"d", #"a", #"n", #"i", #"e", #"l"] = [#"d", #"a", #"n", #"i", #"e", #"l"])
+
+("18. splitList = ", splitList([1,2,3],[[]],2) = [[1], [3]])
+("19. splitList = ", splitList([1,2,3],[[4,5,6],[7,8,9]],1) = [[6, 5, 4], [2, 3], [7, 8, 9]])
+("20. splitList = ", splitList([1,2,3],[[]],1) = [[], [2, 3]])
+
+("21. returnUser = ", returnUser "daniel>hej>tjena>1\n lsdkflksdjksjdfdjk" = User("daniel","hej","tjena",1))
+("22. returnUser = ", returnUser "daniel>hej" = EmptyUser)
+
+("23. formatDate = ", formatDate "Fri Mar 21 14:10:45 2014" = "Mar 21 2014")
+("24. formatDate = ", formatDate "Hej jag heter janne" = "jag hetanne")
+
+("25. checkLogin = ", checkLogin(User(_,"hej",_,_),"hej") = true)
+("26. checkLogin = ", checkLogin(User(_,"hej",_,_),"tjena") = false)
