@@ -5,8 +5,8 @@
 
 open Mosmlcgi;
 open TextIO;
-open rsa;
 
+(* The following four lines gets the website URL's from the url.cfg file *)
 val cfgStream = openIn("../webchat/url.cfg");
 val websiteURL = implode(List.filter (fn x => x <> #"\n") (explode(inputLine(cfgStream))));
 val cgiURL = implode(List.filter (fn x => x <> #"\n") (explode(inputLine(cfgStream))));
@@ -15,7 +15,7 @@ val cfgStream = closeIn(cfgStream);
 exception generalErrorMsg of string
 
 (* REPRESENTATION CONVENTION: Represents a user of a chat forum
-   User(name, password, date, postCount) - A user with name, password, a creation date and a post count
+   User(name, password, date, postCount) - A user with a name, a password, a creation date and a post count
    EmtptyUser - An empty user
 	
  * REPRESENTATION INVARIANT: none
@@ -37,7 +37,7 @@ exception generalErrorMsg of string
 *)
 datatype user = User of (string * string * string * int) | EmptyUser
 
-(* REPRESENTATION CONVENTION: Represents a message in a chat forum
+(* REPRESENTATION CONVENTION: Represents a message in a chatroom
    MSG(username, postdate, text) - A message written by a user with name username at date postdate with text as the content 
  
  * REPRESENTATION INVARIANT: None 
@@ -51,18 +51,19 @@ datatype user = User of (string * string * string * int) | EmptyUser
  *  If a chat file contained this it would contain 2 messages, both from the user named daniel.
  *  Henceforth if we are adding a message to a chat file we will write that we add MSG(xxx, yyy, zzz) to a chat file which means we add xxx ^ "@" ^ yyy ^ "@" ^ zzz ^ "@"
  *  Example1: Adds User("daniel", currentTime, "hejjjjjj") to the chat file Main.
+ *	currentTime is the current servertime as a string.
  *  What we mean here is that we add the string "daniel" ^ "@" ^ currentTime ^ "@" ^ "hejjjjjj" ^ "@" to the end of of the chat file Main
  *)
 datatype message = MSG of (string * string * string)
 
 (* REPRESENTATION CONVENTION: Represents a chat in the web chat
    Chat(cName, msgList) - A chat with name cName and msgList as a list of messages
-   EmptyChat - Represents and empty chat with no name
+   EmptyChat - Represents an empty chat with no name
 	
  * REPRESENTATION INVARIANT: None
  *)
 (*
- *  Important chat note
+ *  Important chat notes
  *  Chats are saved in the file called "webchat/chats/chats.master", which we will refer to as the "master file".
  *  EmptyChats are not saved in any file.
  *  A Chat(cName, mList) is stored as a string in a the master file and a string in the chat file cName.
@@ -120,9 +121,11 @@ fun encrypt input =
 
 (* getSmiley char 
  * TYPE: char -> string
- * PRE: none
+ * PRE: true
  * POST: if char is "P", "D", ")", "(", "O" or "3" then a string of html code for displaying and finding the address for the corresponding jpg image
 		 else the string ":" concatenated with char
+ * EXAMPLE: getSmiley (#"P") = "<img class=\"smiley\" src=\"http://user.it.uu.se/~osah7839/webchat/styles/images/smileys/blub.jpg\" />"
+ * EXAMPLE: getSmiley (#"A") = ":A"
  *)
 fun getSmiley (#"P") = "<img class=\"smiley\" src=\"" ^ websiteURL ^ "styles/images/smileys/blub.jpg\" />"
   | getSmiley (#"D") = "<img class=\"smiley\" src=\"" ^ websiteURL ^ "styles/images/smileys/happy.jpg\" />"
@@ -134,9 +137,9 @@ fun getSmiley (#"P") = "<img class=\"smiley\" src=\"" ^ websiteURL ^ "styles/ima
  
 (* insertSmiley x 
  * TYPE: char list -> string
- * PRE: none
+ * PRE: true
  * POST: x as a string with sublists of x such as [#":", #"P"], [#":", #"D"], [#":", #")"], [#":", #"("], [#":", #"O"], [#":", #"3"] replaced with html code for displaying and finding the address for the corresponding jpg image
- *
+ * EXAMPLE: insertSmiley [#"h",#"e",#"j",#" ",#":",#"P"] = "hej <img class=\"smiley\" src=\"http://user.it.uu.se/~osah7839/webchat/styles/images/smileys/blub.jpg\" />"
  * VARIANT: length of x
  *)
 fun insertSmiley [] = ""
@@ -147,12 +150,14 @@ fun insertSmiley [] = ""
 
 (* filterChar char 
  * TYPE: char -> string
- * PRE: none
+ * PRE: true
  * POST: if char is "<" then "&lt;" 
 		 else if char = "&" then "&amp;" 
 		 else if char = "@" then "&#64;" 
 		 else if char = ">" then "&#62;"
 		 else the element of char as a string
+ * EXAMPLE: filterChar #"<" = "&lt;"
+ * EXAMPLE: filterChar #"a" = "a"
  *)
 fun filterChar #"<" = "&lt;"
   | filterChar #"&" = "&amp;"
@@ -164,6 +169,7 @@ fun filterChar #"<" = "&lt;"
  * TYPE: string -> string
  * PRE: none
  * POST: sList with the characters "<", "&", "@" and ">" replaced with the strings "&lt;", "&amp;", "&#64;", "&#62;" respectively
+ * EXAMPLE: filterString "daniel&oscar<@>" = "daniel&anp;oscar&lt;&#64;&#62;"
  *)
 fun filterString(sList) = foldr (fn (x,y) => filterChar(x) ^ y) "" (explode(sList))
 
@@ -171,7 +177,8 @@ fun filterString(sList) = foldr (fn (x,y) => filterChar(x) ^ y) "" (explode(sLis
  * TYPE: char list -> bool
  * PRE: none
  * POST: true if every char in x is a letter or digit else false
- *
+ * EXAMPLE: alphaNumCheck [#"h",#"!"] = false
+ * EXAMPLE: alphaNumCheck [#"h",#"e",#"j"] = true
  * VARIANT: length of x
  *)
 fun alphaNumCheck [] = true
@@ -180,22 +187,26 @@ fun alphaNumCheck [] = true
 (* stringSizeCheck s 
  * TYPE: string -> bool
  * PRE: none
- * POST: true if the size of s is greater or equal than 3 and less or equal than 10 else false
+ * POST: if the size of s >= 3 and size s <= 10 then true else false
+ * EXAMPLE: stringSizeCheck "ab" = false
+ * EXAMPLE: stringSizeCheck "abc" = true
  *)
-fun stringSizeCheck s = if size s <= 10 andalso size s >= 3 then true else false
+fun stringSizeCheck s = size s <= 10 andalso size s >= 3
 
 (* nameToLower name 
  * TYPE: string -> string
  * PRE: none
  * POST: All of the characters from name but with every alphabetic letter as lowercase
+ * EXAMPLE: nameToLower "HEJ" = "hej"
  *)
 fun nameToLower name = String.map Char.toLower name
   
 (* getName x 
  * TYPE: char list -> char list
  * PRE: none
- * POST: The name from x which is the characters from the start to the first ">" character
- *
+ * POST: The name from x which is the characters from the start to the first ">" character, if no ">" exists then x
+ * EXAMPLE: getName [#"d", #"a", #"n", #"i", #"e", #"l", #">", #"o", #"s", #"c"] = [#"d", #"a", #"n", #"i", #"e", #"l"]
+ * EXAMPLE: getName getName [#"d", #"a", #"n", #"i", #"e", #"l"] = [#"d", #"a", #"n", #"i", #"e", #"l"]
  * VARIANT: length of x
  *)
 fun getName [] = []
@@ -208,7 +219,7 @@ fun getName [] = []
  *
  * SIDE-EFFECTS: advances the current stream position
  *               closes stream if it is endofstream
- *
+ * EXAMPLE: 
  * VARIANT: length of stream
  *)
 fun getUser(is, name) = 
