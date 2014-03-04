@@ -282,7 +282,14 @@ fun checkLogin (User(_,y,_,_), input) = y = input
 (* mainChatList(userName)
  * TYPE: string -> string
  * PRE: true
- * POST: 
+ * POST: for every line in 'is', where 'is' is the instream opened by the function, the line embedded in a html form, where the line of 'is' is the value of the form submit button. 
+			The form also contains a hidden field with the name "formType" and value "reloadChat".
+		 if userName = "admin" then another html form is concatenated to the previous form for every line in is.
+			The form also contains a hidden field with the name "formType" and value "clearChatForm".
+		 if userName = "admin" and the line of the stream <> "Main" then an additional html form is concatenated for every line in is.
+			The form also contains a hidden field with the name "formType" and value "deleteChat".
+		 The action value of all forms is the destination of the chat.cgi file. All forms also contain two hidden fields with the values chatName and userName.
+ * SIDE EFFECTS: open instream 'is'
  *)	  
 fun mainChatList(userName) = 
 	let
@@ -290,16 +297,46 @@ fun mainChatList(userName) =
 		(* mainChatList'(is)
 		 * TYPE: instream -> string
 		 * PRE: if not 'is' is at the end of stream, then 'is' must contain the char \n at least once
-		 * POST: 
+		 * POST: for every line in 'is', the line embedded in a html form, where the line of 'is' is the value of the form submit button. 
+					The form also contains a hidden field with the name "formType" and value "reloadChat".
+				 if userName = "admin" then another html form is concatenated to the previous form for every line in is.
+					The form also contains a hidden field with the name "formType" and value "clearChatForm".
+				 if userName = "admin" and the line of the stream <> "Main" then an additional html form is concatenated for every line in is.
+					The form also contains a hidden field with the name "formType" and value "deleteChat".
+				The action value of all forms is the destination of the chat.cgi file. All forms also contain two hidden fields with the values chatName and userName.
+		 * SIDE EFFECTS: closes the stream 'is'
+		 * EXCEPTIONS: raises generalErrorMsg if last line if 'is' is not equal to string "\n"
 		 *)	
 		fun mainChatList'(stream) = 
 			let
 				val endOfFile = endOfStream(stream)
 				val chatNameFromFile = inputLine(inStream)
 			in
-				if endOfFile then "" else case (String.fields (fn x => x = #"\n") chatNameFromFile) of
-					chatName::_ => (("<form method=\"post\" action=\"" ^ cgiURL ^ "chat.cgi\" class=\"chooseChatForm\"><input type=\"hidden\" name=\"chatName\" value=\"" ^ chatName ^ "\"><input type=\"hidden\" name=\"username\" value=\"" ^ userName ^ "\"><input type=\"hidden\" name=\"formType\" value=\"reloadChat\"><button type=\"submit\">" ^ chatName ^ "</button></form>") ^ (if nameToLower(userName) = "admin" then ("<form method=\"post\" action=\"" ^ cgiURL ^ "chat.cgi\" class=\"clearChatForm\"><input type=\"hidden\" name=\"chatName\" value=\"" ^ chatName ^ "\"><input type=\"hidden\" name=\"username\" value=\"" ^ userName ^ "\"><input type=\"hidden\" name=\"formType\" value=\"clearChat\"><button type=\"submit\"></button></form>") else "") ^ (if userName = "admin" andalso chatName <> "Main" then ("<form method=\"post\" action=\"" ^ cgiURL ^ "chat.cgi\" class=\"deleteChatForm\"><input type=\"hidden\" name=\"chatName\" value=\"" ^ chatName ^ "\"><input type=\"hidden\" name=\"username\" value=\"" ^ userName ^ "\"><input type=\"hidden\" name=\"formType\" value=\"deleteChat\"><button type=\"submit\"></button></form>") else "") ^ mainChatList'(stream))
-				  | _ => raise generalErrorMsg "function mainChatList Error"
+				if endOfFile then (closeIn(stream); "") else 
+					case (String.fields (fn x => x = #"\n") chatNameFromFile) of
+						chatName::_ => 
+						let 
+							val formHiddenFields = "<input type=\"hidden\" name=\"chatName\" value=\"" ^ chatName ^ "\"><input type=\"hidden\" name=\"username\" value=\"" ^ userName ^ "\">"
+						in
+							(("
+								<form method=\"post\" action=\"" ^ cgiURL ^ "chat.cgi\" class=\"chooseChatForm\">" ^ formHiddenFields ^
+									"<input type=\"hidden\" name=\"formType\" value=\"reloadChat\">
+									<button type=\"submit\">" ^ chatName ^ "</button>
+								</form>") ^ 
+							(if nameToLower(userName) = "admin" then ("
+								<form method=\"post\" action=\"" ^ cgiURL ^ "chat.cgi\" class=\"clearChatForm\">" ^ formHiddenFields ^
+									"<input type=\"hidden\" name=\"formType\" value=\"clearChat\">
+									<button type=\"submit\"></button>
+								</form>") 
+							else "") ^ 
+							(if userName = "admin" andalso chatName <> "Main" then ("
+								<form method=\"post\" action=\"" ^ cgiURL ^ "chat.cgi\" class=\"deleteChatForm\">" ^ formHiddenFields ^
+									"<input type=\"hidden\" name=\"formType\" value=\"deleteChat\">
+									<button type=\"submit\"></button>
+								</form>") 
+							else "") ^ mainChatList'(stream))
+						end
+						| _ => raise generalErrorMsg "function mainChatList Error"
 			end
 	in
 		mainChatList'(inStream)
@@ -309,6 +346,9 @@ fun mainChatList(userName) =
  * TYPE: string -> chat
  * PRE: chat file chatName exists and is a chat file
  * POST: Chat(chatName, (a message list where every element is a message string from chat file chatName)
+ * SIDE EFFECTS: opens instream to chat file chatName.
+				 advances instream.
+				 closes previously instream.
  *)
 fun readChat chatName = 
     let
@@ -333,20 +373,22 @@ fun readChat chatName =
 (* readMSG msg
  * TYPE: message -> string
  * PRE: none
- * POST: the attributes from msg added together with proper html code
+ * POST: the constructors of msg added together with proper html code
+ * EXAMPLE: readMSG(MSG("Hej","pa","dej")) = "<b>Hej</b> pa:<br /><i>dej</i><br /><div class=\"chatPostLine\"></div>"
  *)	
 fun readMSG(MSG(x, y, z)) = ("<b>" ^ x ^ "</b>" ^ " " ^ y ^ ":<br /><i>" ^ z ^ "</i><br /><div class=\"chatPostLine\"></div>")
 
 (* readMSGS(chat as Chat(_, msgList))
  * TYPE: chat -> string
  * PRE: chat <> EmptyChat
- * POST: the attributes from msgList added together with proper html code
+ * POST: the constructors of every message in msgList added together with proper html code
+ * EXAMPLE: readMSGS(Chat(_,[MSG("Hej","pa","dej"),MSG("tja","pa","er")])) = "<b>Hej</b> pa:<br /><i>dej</i><br /><div class=\"chatPostLine\"></div><b>tja</b> pa:<br /><i>er</i><br /><div class=\"chatPostLine\"></div>"
  * VARIANT: length msgList
- * EXCEPTIONS: raises Domain if chat = EmptyChat
+ * EXCEPTIONS: raises generalErrorMsg if chat = EmptyChat
  *)	
 fun readMSGS (Chat(name, [])) = ""
   | readMSGS (Chat(name,x::xs)) = readMSG(x) ^ readMSGS (Chat(name,xs))
-  | readMSGS _ = raise Domain (* Varför raise domain här? Ska vi inte pattern matcha EmptyChat på detta ställe?*)
+  | readMSGS _ = raise generalErrorMsg "Error in function readMSGS"
 
 (* generateChat (chatName, user)
  * TYPE: string * user -> unit
@@ -361,20 +403,41 @@ fun generateChat(chat,User(userName,_,date,postCount)) =
 		val currentMsgInput = getOpt(cgi_field_string("currentMsgInput"), "")
 		val formatedDate = formatDate(date)
 	in
-		print ("<div class=\"chatMainDiv\"><div id=\"chatMessagesDiv\"><h3>"
-		^ chat ^ " chat</h3>" 
-		^ messages ^ " </div><div id=\"chatListDiv\">Chats<br />" ^ mainChatList(userName) ^ "</div><br /><div class=\"createChatDiv\">Create chat<br /><form action=\"" 
-		^ cgiURL ^ "chat.cgi\" method=\"post\" class=\"createChatForm\"><input type=\"text\" name=\"chatName\" class=\"newChatTextField\"><br /><input type=\"hidden\" name=\"formType\" value=\"createNewChat\"><input type=\"hidden\" name=\"username\" value=\""
-		^ userName ^ "\"><button type=\"submit\">Create</button></form></div><br /><div class=\"yourProfileDiv\"><h3>Your profile</h3>Name: " 
-		^ userName ^ "<br />Posts: " ^ Int.toString(postCount) ^ "<br />Signup: " ^ formatedDate ^ "</div><br /><div class=\"logoutDiv\"><form action=\"" 
-		^ websiteURL ^ "\" method=\"post\"><button type=\"submit\">Logout</button></form></div><div class=\"writeMessageDiv\"><form name=\"postMessage\" method=\"post\" action=\""
-		^ cgiURL ^ "chat.cgi\"><input type=\"text\" onkeyup=\"msgChanged()\" name=\"postTextField\" id=\"postTextField\" class=\"postTextField\" value=\""
-		^ currentMsgInput ^ "\" onfocus=\"this.value = this.value;\"><input type=\"hidden\" name=\"formType\" value=\"postMessage\"><input type=\"hidden\" name=\"username\" value=\""
-		^ userName ^ "\"><input type=\"hidden\" name=\"chatName\" value=\"" ^ chat ^ "\"><button type=\"submit\" name=\"submit\" value=\"post\" id=\"postSubmit\">Post</button></form></div></div><form name=\"reloadChat\" id=\"reloadChat\" method=\"post\" action=\""
-		^ cgiURL ^ "chat.cgi\"><input type=\"hidden\" name=\"formType\" value=\"reloadChat\"><input type=\"hidden\" name=\"username\" value=\""
-		^ userName ^ "\"><input type=\"hidden\" name=\"currentMsgInput\" id=\"currentMsgInput\" value=\""
-		^ currentMsgInput ^ "\"><input type=\"hidden\" name=\"chatName\" value=\"" ^ chat ^ "\"></form><script src=\""
-		^ websiteURL ^ "js/scripts.js\"></script>")
+		print ("
+		<div class=\"chatMainDiv\">
+			<div id=\"chatMessagesDiv\"><h3>" ^ chat ^ " chat</h3>" ^ messages ^ " </div>
+			<div id=\"chatListDiv\">Chats<br />" ^ mainChatList(userName) ^ "</div><br />
+			<div class=\"createChatDiv\">Create chat<br />
+				<form action=\"" ^ cgiURL ^ "chat.cgi\" method=\"post\" class=\"createChatForm\">
+					<input type=\"text\" name=\"chatName\" class=\"newChatTextField\"><br />
+					<input type=\"hidden\" name=\"formType\" value=\"createNewChat\">
+					<input type=\"hidden\" name=\"username\" value=\"" ^ userName ^ "\">
+					<button type=\"submit\">Create</button>
+				</form>
+			</div><br />
+			<div class=\"yourProfileDiv\"><h3>Your profile</h3>Name: " ^ userName ^ "<br />Posts: " ^ Int.toString(postCount) ^ "<br />Signup: " ^ formatedDate ^ "</div><br />
+			<div class=\"logoutDiv\">
+				<form action=\"" ^ websiteURL ^ "\" method=\"post\">
+					<button type=\"submit\">Logout</button>
+				</form>
+			</div>
+			<div class=\"writeMessageDiv\">
+				<form name=\"postMessage\" method=\"post\" action=\"" ^ cgiURL ^ "chat.cgi\">
+					<input type=\"text\" onkeyup=\"msgChanged()\" name=\"postTextField\" id=\"postTextField\" class=\"postTextField\" value=\"" ^ currentMsgInput ^ "\" onfocus=\"this.value = this.value;\">
+					<input type=\"hidden\" name=\"formType\" value=\"postMessage\">
+					<input type=\"hidden\" name=\"username\" value=\"" ^ userName ^ "\">
+					<input type=\"hidden\" name=\"chatName\" value=\"" ^ chat ^ "\">
+					<button type=\"submit\" name=\"submit\" value=\"post\" id=\"postSubmit\">Post</button>
+				</form>
+			</div>
+		</div>
+		<form name=\"reloadChat\" id=\"reloadChat\" method=\"post\" action=\"" ^ cgiURL ^ "chat.cgi\">
+			<input type=\"hidden\" name=\"formType\" value=\"reloadChat\">
+			<input type=\"hidden\" name=\"username\" value=\"" ^ userName ^ "\">
+			<input type=\"hidden\" name=\"currentMsgInput\" id=\"currentMsgInput\" value=\"" ^ currentMsgInput ^ "\">
+			<input type=\"hidden\" name=\"chatName\" value=\"" ^ chat ^ "\">
+		</form>
+		<script src=\"" ^ websiteURL ^ "js/scripts.js\"></script>")
 	end
   | generateChat(_,EmptyUser) = raise generalErrorMsg "Error in function generateChat"
 

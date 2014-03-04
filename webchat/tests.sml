@@ -34,3 +34,6 @@
 
 ("25. checkLogin = ", checkLogin(User(_,"hej",_,_),"hej") = true)
 ("26. checkLogin = ", checkLogin(User(_,"hej",_,_),"tjena") = false)
+
+("27. readMSG = ", readMSG(MSG("Hej","pa","dej")) = "<b>Hej</b> pa:<br /><i>dej</i><br /><div class=\"chatPostLine\"></div>")
+("28. readMSGS = ", readMSGS(Chat(_,[MSG("Hej","pa","dej"),MSG("tja","pa","er")])) = "<b>Hej</b> pa:<br /><i>dej</i><br /><div class=\"chatPostLine\"></div><b>tja</b> pa:<br /><i>er</i><br /><div class=\"chatPostLine\"></div>")
