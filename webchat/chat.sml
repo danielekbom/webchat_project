@@ -318,22 +318,22 @@ fun mainChatList(userName) =
 						let 
 							val formHiddenFields = "<input type=\"hidden\" name=\"chatName\" value=\"" ^ chatName ^ "\"><input type=\"hidden\" name=\"username\" value=\"" ^ userName ^ "\">"
 						in
-							(("
-								<form method=\"post\" action=\"" ^ cgiURL ^ "chat.cgi\" class=\"chooseChatForm\">" ^ formHiddenFields ^
-									"<input type=\"hidden\" name=\"formType\" value=\"reloadChat\">
-									<button type=\"submit\">" ^ chatName ^ "</button>
-								</form>") ^ 
-							(if nameToLower(userName) = "admin" then ("
-								<form method=\"post\" action=\"" ^ cgiURL ^ "chat.cgi\" class=\"clearChatForm\">" ^ formHiddenFields ^
-									"<input type=\"hidden\" name=\"formType\" value=\"clearChat\">
-									<button type=\"submit\"></button>
-								</form>") 
+							((
+								"<form method=\"post\" action=\"" ^ cgiURL ^ "chat.cgi\" class=\"chooseChatForm\">" ^ formHiddenFields ^
+									"<input type=\"hidden\" name=\"formType\" value=\"reloadChat\">" ^
+									"<button type=\"submit\">" ^ chatName ^ "</button>" ^
+								"</form>") ^ 
+							(if nameToLower(userName) = "admin" then (
+								"<form method=\"post\" action=\"" ^ cgiURL ^ "chat.cgi\" class=\"clearChatForm\">" ^ formHiddenFields ^
+									"<input type=\"hidden\" name=\"formType\" value=\"clearChat\">" ^
+									"<button type=\"submit\"></button>" ^
+								"</form>") 
 							else "") ^ 
-							(if userName = "admin" andalso chatName <> "Main" then ("
-								<form method=\"post\" action=\"" ^ cgiURL ^ "chat.cgi\" class=\"deleteChatForm\">" ^ formHiddenFields ^
-									"<input type=\"hidden\" name=\"formType\" value=\"deleteChat\">
-									<button type=\"submit\"></button>
-								</form>") 
+							(if userName = "admin" andalso chatName <> "Main" then (
+								"<form method=\"post\" action=\"" ^ cgiURL ^ "chat.cgi\" class=\"deleteChatForm\">" ^ formHiddenFields ^
+									"<input type=\"hidden\" name=\"formType\" value=\"deleteChat\">" ^
+									"<button type=\"submit\"></button>" ^
+								"</form>") 
 							else "") ^ mainChatList'(stream))
 						end
 						| _ => raise generalErrorMsg "function mainChatList Error"
@@ -403,41 +403,41 @@ fun generateChat(chat,User(userName,_,date,postCount)) =
 		val currentMsgInput = getOpt(cgi_field_string("currentMsgInput"), "")
 		val formatedDate = formatDate(date)
 	in
-		print ("
-		<div class=\"chatMainDiv\">
-			<div id=\"chatMessagesDiv\"><h3>" ^ chat ^ " chat</h3>" ^ messages ^ " </div>
-			<div id=\"chatListDiv\">Chats<br />" ^ mainChatList(userName) ^ "</div><br />
-			<div class=\"createChatDiv\">Create chat<br />
-				<form action=\"" ^ cgiURL ^ "chat.cgi\" method=\"post\" class=\"createChatForm\">
-					<input type=\"text\" name=\"chatName\" class=\"newChatTextField\"><br />
-					<input type=\"hidden\" name=\"formType\" value=\"createNewChat\">
-					<input type=\"hidden\" name=\"username\" value=\"" ^ userName ^ "\">
-					<button type=\"submit\">Create</button>
-				</form>
-			</div><br />
-			<div class=\"yourProfileDiv\"><h3>Your profile</h3>Name: " ^ userName ^ "<br />Posts: " ^ Int.toString(postCount) ^ "<br />Signup: " ^ formatedDate ^ "</div><br />
-			<div class=\"logoutDiv\">
-				<form action=\"" ^ websiteURL ^ "\" method=\"post\">
-					<button type=\"submit\">Logout</button>
-				</form>
-			</div>
-			<div class=\"writeMessageDiv\">
-				<form name=\"postMessage\" method=\"post\" action=\"" ^ cgiURL ^ "chat.cgi\">
-					<input type=\"text\" onkeyup=\"msgChanged()\" name=\"postTextField\" id=\"postTextField\" class=\"postTextField\" value=\"" ^ currentMsgInput ^ "\" onfocus=\"this.value = this.value;\">
-					<input type=\"hidden\" name=\"formType\" value=\"postMessage\">
-					<input type=\"hidden\" name=\"username\" value=\"" ^ userName ^ "\">
-					<input type=\"hidden\" name=\"chatName\" value=\"" ^ chat ^ "\">
-					<button type=\"submit\" name=\"submit\" value=\"post\" id=\"postSubmit\">Post</button>
-				</form>
-			</div>
-		</div>
-		<form name=\"reloadChat\" id=\"reloadChat\" method=\"post\" action=\"" ^ cgiURL ^ "chat.cgi\">
-			<input type=\"hidden\" name=\"formType\" value=\"reloadChat\">
-			<input type=\"hidden\" name=\"username\" value=\"" ^ userName ^ "\">
-			<input type=\"hidden\" name=\"currentMsgInput\" id=\"currentMsgInput\" value=\"" ^ currentMsgInput ^ "\">
-			<input type=\"hidden\" name=\"chatName\" value=\"" ^ chat ^ "\">
-		</form>
-		<script src=\"" ^ websiteURL ^ "js/scripts.js\"></script>")
+		print (
+		"<div class=\"chatMainDiv\">" ^
+			"<div id=\"chatMessagesDiv\"><h3>" ^ chat ^ " chat</h3>" ^ messages ^ " </div>" ^
+			"<div id=\"chatListDiv\">Chats<br />" ^ mainChatList(userName) ^ "</div><br />" ^
+			"<div class=\"createChatDiv\">Create chat<br />" ^
+				"<form action=\"" ^ cgiURL ^ "chat.cgi\" method=\"post\" class=\"createChatForm\">" ^
+					"<input type=\"text\" name=\"chatName\" class=\"newChatTextField\"><br />" ^
+					"<input type=\"hidden\" name=\"formType\" value=\"createNewChat\">" ^
+					"<input type=\"hidden\" name=\"username\" value=\"" ^ userName ^ "\">" ^
+					"<button type=\"submit\">Create</button>" ^
+				"</form>" ^
+			"</div><br />" ^
+			"<div class=\"yourProfileDiv\"><h3>Your profile</h3>Name: " ^ userName ^ "<br />Posts: " ^ Int.toString(postCount) ^ "<br />Signup: " ^ formatedDate ^ "</div><br />" ^
+			"<div class=\"logoutDiv\">" ^
+				"<form action=\"" ^ websiteURL ^ "\" method=\"post\">" ^
+					"<button type=\"submit\">Logout</button>" ^
+				"</form>" ^
+			"</div>" ^
+			"<div class=\"writeMessageDiv\">" ^
+				"<form name=\"postMessage\" method=\"post\" action=\"" ^ cgiURL ^ "chat.cgi\">" ^
+					"<input type=\"text\" onkeyup=\"msgChanged()\" name=\"postTextField\" id=\"postTextField\" class=\"postTextField\" value=\"" ^ currentMsgInput ^ "\" onfocus=\"this.value = this.value;\">" ^
+					"<input type=\"hidden\" name=\"formType\" value=\"postMessage\">" ^
+					"<input type=\"hidden\" name=\"username\" value=\"" ^ userName ^ "\">" ^
+					"<input type=\"hidden\" name=\"chatName\" value=\"" ^ chat ^ "\">" ^
+					"<button type=\"submit\" name=\"submit\" value=\"post\" id=\"postSubmit\">Post</button>" ^
+				"</form>" ^
+			"</div>" ^
+		"</div>" ^
+		"<form name=\"reloadChat\" id=\"reloadChat\" method=\"post\" action=\"" ^ cgiURL ^ "chat.cgi\">" ^
+			"<input type=\"hidden\" name=\"formType\" value=\"reloadChat\">" ^
+			"<input type=\"hidden\" name=\"username\" value=\"" ^ userName ^ "\">" ^
+			"<input type=\"hidden\" name=\"currentMsgInput\" id=\"currentMsgInput\" value=\"" ^ currentMsgInput ^ "\">" ^
+			"<input type=\"hidden\" name=\"chatName\" value=\"" ^ chat ^ "\">" ^
+		"</form>" ^
+		"<script src=\"" ^ websiteURL ^ "js/scripts.js\"></script>")
 	end
   | generateChat(_,EmptyUser) = raise generalErrorMsg "Error in function generateChat"
 
