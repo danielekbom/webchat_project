@@ -12,7 +12,7 @@ fun findE(x, n) = if IntInf.eq(IntInf.mod(x, n), IntInf.fromInt(0)) then
  * TYPE: string -> string
  * PRE: n > 0
  * POST: pass with every char replaced by their ascii value
- * EXAMPLE: convertPassword("hello123") = 979899495051
+ * EXAMPLE: convertPassword("abc123") = 979899495051
  *)		
 fun convertPassword pass = foldr (fn (x,y) => Int.toString(ord(x)) ^ y) "" (explode(pass))
 
