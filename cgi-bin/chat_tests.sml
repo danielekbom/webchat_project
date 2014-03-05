@@ -52,5 +52,5 @@ use "chat.sml";
 ("29. changeUserFieldInFile = ", changeUserFieldInFile("Daniel","Daniel>348934853498>hej>2\n","bertil",3) = "Daniel>348934853498>bertil>2\n");
 ("30. changeUserFieldInFile = ", changeUserFieldInFile("Daniel","Oscar>348934853498>hej>2\n","bertil",3) = "Oscar>348934853498>hej>2\n");
 
-("31. nameToLower = ", nameToLower "JANNE" = "janne")
-("32. nameToLower = ", nameToLower "janne" = "janne")
+("31. nameToLower = ", nameToLower "JANNE" = "janne");
+("32. nameToLower = ", nameToLower "janne" = "janne");
