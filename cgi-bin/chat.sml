@@ -1,6 +1,6 @@
-(* 	Om man glömmer:
-	cd public_html/cgi-bin
-	mosmlc chat.sml -o chat.cgi
+(*
+Authors: Oscar Ahlén, Daniel Enkvist, Daniel Ekbom
+Date: 5 mars 2014
 *)
 
 open Mosmlcgi;
@@ -587,17 +587,19 @@ fun addToPostCount(User(name, _, _, post)) =
 
 (* postMessage(user as User(name, pw, date, postCount), chatName)
  * TYPE: User * string -> unit
- * PRE: none
+ * PRE: user <> EmptyUser
  * POST: ()
  * SIDE EFFECTS: val message = the value of postTextField in the html script
 				 if message <> "" then
 					val message = remove illegal chars and replace smiley text with the html code for smiley images for message
-					Adds MSG(user, currentDate, message) to the chat chatName
-					Increases the uPostCount of user by 1
-					
-					generateChat(chatName, User(name, pw, date, postCount+1))
+					Adds MSG(name, current servertime as a string, if the size of message > 1000 then (the first 1000 chars of message) ^ "..." else message) to chatName chat file
+					Opens instream to the user text file, advances instream, closes instream.
+					Opens outstream to the user text file.
+					Sets the uPostCount of user uName to postCount+1 in the outstream.
+					Closes outstream.
+					Prints html code including the data from the user and the name and messages from chatName chat file.
 				 else
-					genereateChat(chatName, user)
+					Prints html code including the data from the user and the name and messages from chatName chat file.
  * EXCEPTIONS: if user = EmptyUser then raise generalErrorMsg
  *)
 fun postMessage(user as User(name, pw, date, postCount),chatName) =
@@ -611,7 +613,7 @@ fun postMessage(user as User(name, pw, date, postCount),chatName) =
 
 (* chatExists(chatName, stream)
  * TYPE: string * instream -> bool
- * PRE: none
+ * PRE: true
  * POST: if the chat chatName exists in the master file then true
 		 else false
  * SIDE EFFECTS: Advances the stream
@@ -632,16 +634,20 @@ fun chatExists (chatName,stream) =
 
 (* createNewChat(chatName, user)
  * TYPE: string * User -> unit
- * PRE: none
+ * PRE: user <> EmptyUser
  * POST: ()
- * SIDE EFFECTS: Opens an outstream to the master file
+ * SIDE EFFECTS: Opens an outstream to the master file, and advances the outstream to the end.
 				 if chatName contains only alphanumeric chars then
 					Opens an instream to the master file
+					Advances the instream
+					Closes instream
 					if chat chatName does not exist in the master file then
+						Advances the outstream
 						Create chat chatName
+						Closes the outstream
+						Opens an outstream to chat file chatName which creates a new chatName file
 						Closes the previously opened outstream
-						
-						generateChat(chatName, user)
+						Prints html code including the data from the user and the name and messages from chatName chat file.
 					else
 						prints "Chat already exists!"
 				 else
@@ -664,13 +670,12 @@ fun createNewChat (chatName,user) =
 
 (* clearChat(chatName, user)
  * TYPE: string * User -> unit
- * PRE: none
+ * PRE: user <> EmptyUser
  * POST: ()
  * SIDE EFFECTS: Opens an outstream to the chat chatName
 				 Outputs "" to the previously opened outstream
 				 Closes the previously opened outstream
-				 
-				 generateChat(chatName, user)
+				 Prints html code including the data from the user and the name and messages from chatName chat file.
  *)
 fun clearChat (chatName,user) =
 	let
@@ -681,7 +686,7 @@ fun clearChat (chatName,user) =
 
 (* deleteChatAux(chatName, stream)
  * TYPE: string * instream -> string
- * PRE: none
+ * PRE: true
  * POST: The contents of stream with the line equal to chatName ^ "\n" removed
  * SIDE EFFECTS: Advances the position of stream
  * VARIANT: lines in stream
@@ -698,11 +703,17 @@ fun deleteChatAux (chatName,stream) =
 
 (* deleteChat(chatName, user)
  * TYPE: string * User -> unit
- * PRE: chat file chatName exists
+ * PRE: chat file chatName exists. user <> EmptyUser.
  * POST: ()
- * SIDE EFFECTS: Deletes chat chatName
-				 
-				 generateChat("Main", user)
+ * SIDE EFFECTS: Opens instream to the master file
+				 Advances the instream
+				 Closes the instream
+				 Opens outstream to the master file
+				 Advances outstream
+				 Deletes chat chatName
+				 Closes outstream
+				 Deletes the chat file chatName
+				 Prints html code including the data from the user and the name and messages from chat file "Main".
  *)
 fun deleteChat(chatName,user) =
 	let
@@ -716,8 +727,10 @@ fun deleteChat(chatName,user) =
 
 (* nameToLower(name)
  * TYPE: string -> string
- * PRE: none
+ * PRE: true
  * POST: name where all alphabetical chars are uppercase.
+ * EXAMPLE: nameToLower "JANNE" = "janne"
+ * EXAMPLE: nameToLower "janne" = "janne"
  *)	
 fun nameToLower name = String.map Char.toLower name
 
@@ -726,8 +739,7 @@ fun nameToLower name = String.map Char.toLower name
  * TYPE: unit -> unit
  * PRE: true
  * POST: ()
- * SIDE EFFECTS: Prints initial html code for the webpage...
- *               MOAR
+ * SIDE EFFECTS: prints the entire website in html format
  * EXCEPTIONS: if the html variable formType is not equal to one of the following strings:
 				"login"
 				"signup"
