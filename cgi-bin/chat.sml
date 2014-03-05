@@ -76,15 +76,6 @@ datatype message = MSG of (string * string * string)
  *)
 datatype chat = Chat of (string * message list) | EmptyChat
 
-(* findE(x, n)
- * TYPE: int/1 * int/1 -> int/1
- * PRE: n > 1
- * POST: the lowest coprime of x in the interval [n, x]
- * VARIANT: The probability that x is not coprime to n (where n is incremented by one in every recursive step)
- *)		
-fun findE (x, n) = if IntInf.eq(euclid(x, n), IntInf.fromInt(1)) then n
-				   else findE(x, IntInf.+(n, IntInf.fromInt(1))); 
-
 (* euclid(x, n)
  * TYPE: int/1 * int/1 -> int/1
  * PRE: true
@@ -94,6 +85,15 @@ fun findE (x, n) = if IntInf.eq(euclid(x, n), IntInf.fromInt(1)) then n
 fun euclid(x, n) = if not(IntInf.eq(IntInf.mod(x, n), IntInf.fromInt(0))) then
 						euclid(n, IntInf.mod(x, n)) 
 					else n;
+
+(* findE(x, n)
+ * TYPE: int/1 * int/1 -> int/1
+ * PRE: n > 1
+ * POST: the lowest coprime of x in the interval [n, x]
+ * VARIANT: The probability that x is not coprime to n (where n is incremented by one in every recursive step)
+ *)		
+fun findE (x, n) = if IntInf.eq(euclid(x, n), IntInf.fromInt(1)) then n
+				   else findE(x, IntInf.+(n, IntInf.fromInt(1))); 
 
 (* convertPassword(pass)
  * TYPE: string -> string
