@@ -16,7 +16,6 @@ use "chat.sml";
 ("4. findE = ", IntInf.toString(findE(IntInf.fromInt(24),IntInf.fromInt(2))) = "5");
 ("5. euclid = ", IntInf.toString(euclid(IntInf.fromInt(1071),IntInf.fromInt(1029))) = "21");
 
-
 ("6. getSmiley = ", getSmiley (#"P") = "<img class=\"smiley\" src=\"" ^ websiteURL ^ "styles/images/smileys/blub.jpg\" />");
 ("7. getSmiley = ", getSmiley (#"A") = ":A");
 ("8. insertSmiley = ", insertSmiley [#"h",#"e",#"j",#" ",#":",#"P"] = "hej <img class=\"smiley\" src=\"" ^ websiteURL ^ "styles/images/smileys/blub.jpg\" />");
