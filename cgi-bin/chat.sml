@@ -116,10 +116,11 @@ fun encrypt input =
 		val p = valOf(IntInf.fromString("5371393606024775251256550436773565977406724269152942136415762782810562554131599074907426010737503501"))
 		val q = valOf(IntInf.fromString("2908511952812557872434704820397229928450530253990158990550731991011846571635621025786879881561814989"))
 	
+		val largeOne = IntInf.fromInt(1)
 		val largeTwo = IntInf.fromInt(2)
 	
 		val n = IntInf.*(p, q)
-		val m = IntInf.*(IntInf.-(p, largeTwo), IntInf.-(q, largeTwo))
+		val m = IntInf.*(IntInf.-(p, largeOne), IntInf.-(q, largeOne))
 
 		val e = IntInf.toInt(findE(m, largeTwo))
 
