@@ -17,7 +17,7 @@ function setTextFieldFocus(){
 	document.getElementById('postTextField').focus();
 }
 
-//
+//Gets the content from the chat text file of the current chat
 function getChatMessages(){
 	var xmlhttp;
 	if (window.XMLHttpRequest){
@@ -39,7 +39,10 @@ function getChatMessages(){
 	xmlhttp.send();
 }
 
-function loadXMLDoc()
+//This script runs every 5 seconds. It gets the content from the chat text file of the current chat.
+//It then compares the content with the content gotten from the "getChatMessages" function.
+//If the content has any difference the page is reloaded.
+function compareChatMessages()
 {
 	var xmlhttp;
 	if (window.XMLHttpRequest){
@@ -64,6 +67,8 @@ function loadXMLDoc()
 	xmlhttp.send();
 }
 
+//This function checks if the text message field for chat messages is empty or not.
+//If it is empty the submitbuttons disabled is set to true, else to false.
 function msgChanged(){
 	if (document.getElementById('postTextField').value != ""){
 		document.getElementById('postSubmit').disabled = false
@@ -73,10 +78,12 @@ function msgChanged(){
 	}
 }
 
+//Runs functions when the window has loaded.
 window.onload = scrollChatWindow();
 window.onload = getChatMessages();
 window.onload = setTextFieldFocus();
 window.onload = msgChanged();
+//Runs the compareChatMessages function every 5 seconds.
 window.setInterval(function(){
-  loadXMLDoc();
+  compareChatMessages();
 }, 5000);
