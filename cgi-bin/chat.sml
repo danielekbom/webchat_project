@@ -437,6 +437,7 @@ fun generateChat(chat,User(userName,_,date,postCount)) =
 			"<input type=\"hidden\" name=\"currentMsgInput\" id=\"currentMsgInput\" value=\"" ^ currentMsgInput ^ "\">" ^
 			"<input type=\"hidden\" name=\"chatName\" value=\"" ^ chat ^ "\">" ^
 		"</form>" ^
+		"<input type=\"hidden\" id=\"chatNameToJs\" value=\"" ^ chat ^ "\">" ^
 		"<script src=\"" ^ websiteURL ^ "js/scripts.js\"></script>")
 	end
   | generateChat(_,EmptyUser) = raise generalErrorMsg "Error in function generateChat"

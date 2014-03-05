@@ -1,17 +1,23 @@
 // JavaScript Document
 
-var websiteURL = "http://user.it.uu.se/~osah7839/webchat/";
+//Authors: Oscar Ahlén, Daniel Enkvist, Daniel Ekbom
+//Date: 5 mars 2014
+
+var websiteURL = "http://user.it.uu.se/~daek3938/webchat/";
 var currentChatMessages;
 
+//Scrolls down the chatwindow scrollbar to the bottom automaticly.
 function scrollChatWindow(){
 	var messageDiv = document.getElementById("chatMessagesDiv");
 	messageDiv.scrollTop = messageDiv.scrollHeight;
 }
 
+//Sets focus on the message textfield onload
 function setTextFieldFocus(){
 	document.getElementById('postTextField').focus();
 }
 
+//
 function getChatMessages(){
 	var xmlhttp;
 	if (window.XMLHttpRequest){
@@ -28,7 +34,8 @@ function getChatMessages(){
 		
     	}
 	}
-	xmlhttp.open("POST",websiteURL + "chats/Main.txt",true);
+	var chatName = document.getElementById('chatNameToJs').value;
+	xmlhttp.open("POST",websiteURL + "chats/" + chatName + ".txt",true);
 	xmlhttp.send();
 }
 
@@ -52,7 +59,8 @@ function loadXMLDoc()
 			}
     	}
 	}
-	xmlhttp.open("POST",websiteURL + "chats/Main.txt",true);
+	var chatName = document.getElementById('chatNameToJs').value;
+	xmlhttp.open("POST",websiteURL + "chats/" + chatName + ".txt",true);
 	xmlhttp.send();
 }
 
