@@ -78,7 +78,7 @@ datatype chat = Chat of (string * message list) | EmptyChat
 
 (* euclid(x, n)
  * TYPE: int/1 * int/1 -> int/1
- * PRE: true
+ * PRE: x > n
  * POST: The largest common divisor to x and n.
  * VARIANT: n
  *)
