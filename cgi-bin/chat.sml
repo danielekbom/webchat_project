@@ -1,6 +1,6 @@
 (* 	Om man glömmer:
-	cd public_html/webchat/
-	mosmlc rsa.sml chat.sml -o ../cgi-bin/chat.cgi
+	cd public_html/cgi-bin
+	mosmlc chat.sml -o chat.cgi
 *)
 
 open Mosmlcgi;
@@ -736,7 +736,7 @@ fun nameToLower name = String.map Char.toLower name
 				"clearChat"
 				"deleteChat"
 				"reloadChat"
-				then raise generalErrorMsg
+				then print "Error in function Main"
  *)	
 fun main() =
 	let
@@ -760,7 +760,7 @@ fun main() =
 		  | "clearChat" => clearChat(chatName,user)
 		  | "deleteChat" => deleteChat(chatName,user)
 		  | "reloadChat" => generateChat(chatName,user)
-		  | _ => raise generalErrorMsg "Error in function Main");
+		  | _ => print "Error in function Main");
 		print "</body></html>")
     end;
 
