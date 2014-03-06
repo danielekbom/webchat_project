@@ -99,7 +99,7 @@ fun findE (x, n) = if IntInf.eq(euclid(x, n), IntInf.fromInt(1)) then n
  * TYPE: string -> string
  * PRE: true
  * POST: pass with every char replaced by their ascii value
- * EXAMPLE: convertPassword("abc123") = 979899495051
+ * EXAMPLE: convertPassword("abc123") = "979899495051"
  *)		
 fun convertPassword pass = foldr (fn (x,y) => Int.toString(ord(x)) ^ y) "" (explode(pass))
 
