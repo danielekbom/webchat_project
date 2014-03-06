@@ -487,12 +487,12 @@ fun signup(name, password, passwordRepeat) =
     in
 		if password = passwordRepeat then 
 			let
+				val nameAlphaNumCheck = (alphaNumCheck(explode(name)) andalso alphaNumCheck(explode(password)))
 				val password = encrypt(password)
 				val inStream = openIn "../webchat/users.txt"
 				val successName = getUser(inStream, name) = ""
 				val outStream = openAppend("../webchat/users.txt")
 				val date = Date.toString(Date.fromTimeUniv(Time.now()))
-				val nameAlphaNumCheck = (alphaNumCheck(explode(name)) andalso alphaNumCheck(explode(password)))
 			in
 				if successName andalso nameAlphaNumCheck andalso stringSizeChecked then (output(outStream, name ^ ">" ^ password ^ ">" ^ date ^ ">" ^ "0\n"); closeOut(outStream); login(User(name,password,date,0), passwordRepeat))
 			else 
